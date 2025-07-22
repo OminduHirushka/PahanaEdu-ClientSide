@@ -16,7 +16,7 @@ import {
   CloseOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
-import logo from "/public/pahana-edu-logo.png";
+import logo from "/pahana-edu-logo.png";
 
 const { Title } = Typography;
 
@@ -47,14 +47,14 @@ const Navbar = ({ nav, selectedKey = "home" }) => {
     {
       key: "login",
       icon: <LoginOutlined />,
-      label: <Link to="/#">Login</Link>,
+      label: <Link to="/auth/login">Login</Link>,
       className: "auth-nav-item",
     },
     {
-      key: "signup",
+      key: "register",
       icon: <UserAddOutlined />,
-      label: <Link to="/#">Sign Up</Link>,
-      className: "auth-nav-item signup-btn",
+      label: <Link to="/auth/register">Register</Link>,
+      className: "auth-nav-item register-btn",
     },
   ];
 
@@ -236,11 +236,11 @@ const Navbar = ({ nav, selectedKey = "home" }) => {
         .auth-nav-item {
           margin-left: 8px !important;
         }
-        .signup-btn {
+        .register-btn {
           background-color: #1890ff !important;
           border-radius: 4px !important;
         }
-        .signup-btn:hover {
+        .register-btn:hover {
           background-color: #40a9ff !important;
         }
 
