@@ -1,8 +1,9 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import Home from "./pages/home/Home";
-import About from "./pages/home/About";
-import Contact from "./pages/home/Contact";
+import Home from "./pages/app/Home";
+import About from "./pages/app/About";
+import Contact from "./pages/app/Contact";
+import BookRoutes from "./routes/BookRoutes";
 import AuthRoutes from "./routes/AuthRoutes";
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
+      <Route path="/books/*" element={<BookRoutes />} />
       <Route path="/auth/*" element={<AuthRoutes />} />
     </Routes>
   );

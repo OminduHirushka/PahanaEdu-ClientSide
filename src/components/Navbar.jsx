@@ -39,7 +39,7 @@ const Navbar = ({ nav, selectedKey = "home" }) => {
     },
     {
       key: "books",
-      label: <Link to="/#">Books</Link>,
+      label: <Link to="/books">Books</Link>,
     },
   ];
 
