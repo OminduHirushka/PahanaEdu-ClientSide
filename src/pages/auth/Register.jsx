@@ -1,9 +1,30 @@
 import React, { useState, useEffect } from "react";
-import { Layout, Form, Input, Button, Card, Typography, Divider, Row, Col, Select, message } from "antd";
-import { MailOutlined, LockOutlined, UserOutlined, PhoneOutlined, IdcardOutlined, HomeOutlined } from "@ant-design/icons";
+import axios from "axios";
+import {
+  Layout,
+  Form,
+  Input,
+  Button,
+  Card,
+  Typography,
+  Row,
+  Col,
+  Select,
+} from "antd";
+import {
+  MailOutlined,
+  LockOutlined,
+  UserOutlined,
+  PhoneOutlined,
+  IdcardOutlined,
+  HomeOutlined,
+} from "@ant-design/icons";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { registerUser } from "../../state/auth/authAction";
+import toast from "react-hot-toast";
 
 const { Option } = Select;
 const { Content } = Layout;
@@ -19,20 +40,32 @@ const colors = {
 };
 
 const fetchLastAccountNumbers = async () => {
-  return {
-    CUSTOMER: "CU-1101",
-    EMPLOYEE: "UE-045",
-    ADMIN: "UA-12",
-    MANAGER: "UM-08"
-  };
+  try {
+    const baseURL = import.meta.env.VITE_API_URL;
+    const response = await axios.get(`${baseURL}/auth/last-account-numbers`);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch account numbers from API:", error);
+
+    return {
+      CUSTOMER: "CU-001",
+      EMPLOYEE: "UE-001",
+      ADMIN: "UA-001",
+      MANAGER: "UM-001",
+    };
+  }
 };
 
 const Register = () => {
   const [form] = Form.useForm();
+
   const [loading, setLoading] = useState(false);
   const [lastAccountNumbers, setLastAccountNumbers] = useState({});
   const [accountNumberPrefix, setAccountNumberPrefix] = useState("");
+
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const loadLastAccountNumbers = async () => {
@@ -41,14 +74,23 @@ const Register = () => {
         setLastAccountNumbers(numbers);
       } catch (error) {
         console.error("Failed to fetch account numbers:", error);
+        toast.error("Failed to load account numbers.");
+
+        setLastAccountNumbers({
+          CUSTOMER: "CU-001",
+          EMPLOYEE: "UE-001",
+          ADMIN: "UA-001",
+          MANAGER: "UM-001",
+        });
       }
     };
+
     loadLastAccountNumbers();
   }, []);
 
   const handleRoleChange = (role) => {
     let prefix = "";
-    switch(role) {
+    switch (role) {
       case "CUSTOMER":
         prefix = "CU-";
         break;
@@ -68,9 +110,11 @@ const Register = () => {
 
     if (lastAccountNumbers[role]) {
       const lastNumber = lastAccountNumbers[role];
-      const numberPart = lastNumber.split('-')[1];
+      const numberPart = lastNumber.split("-")[1];
       const nextNumber = parseInt(numberPart, 10) + 1;
-      const paddedNumber = nextNumber.toString().padStart(numberPart.length, '0');
+      const paddedNumber = nextNumber
+        .toString()
+        .padStart(numberPart.length, "0");
       form.setFieldsValue({ accountNumber: `${prefix}${paddedNumber}` });
     } else {
       form.setFieldsValue({ accountNumber: `${prefix}001` });
@@ -80,14 +124,24 @@ const Register = () => {
   const handleRegister = async (values) => {
     setLoading(true);
     try {
-      console.log('Registration values:', values);
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      message.success('Registration successful!');
-      navigate('/auth/login');
+      const result = await dispatch(
+        registerUser({
+          accountNumber: values.accountNumber,
+          fullName: values.fullName.trim(),
+          email: values.email.trim(),
+          password: values.password.trim(),
+          contact: values.contact.trim(),
+          nic: values.nic.trim(),
+          address: values.address.trim(),
+          role: values.role || "CUSTOMER",
+        })
+      );
+
+      toast.success("Registration Successful!");
+      navigate("/auth/login");
     } catch (error) {
-      message.error('Registration failed. Please try again.');
-      console.error('Registration error:', error);
+      console.error("Registration error in component:", error);
+      toast.error("Registration Failed! Please try again.");
     } finally {
       setLoading(false);
     }
@@ -96,39 +150,49 @@ const Register = () => {
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Navbar selectedKey="register" />
-      
-      <Content style={{ 
-        padding: "0", 
-        background: "#fff",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
-      }}>
-        <div style={{ 
-          width: "100%",
-          maxWidth: "1200px",
-          padding: "2rem",
-          margin: "2rem 0"
-        }}>
+
+      <Content
+        style={{
+          padding: "0",
+          background: "#fff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "1200px",
+            padding: "2rem",
+            margin: "2rem 0",
+          }}
+        >
           <Row gutter={[48, 48]} align="middle">
             <Col xs={24} lg={12}>
               <div style={{ textAlign: "center", padding: "0 1rem" }}>
-                <Title level={2} style={{ 
-                  color: colors.darkText,
-                  fontSize: "2.5rem",
-                  marginBottom: "1rem"
-                }}>
+                <Title
+                  level={2}
+                  style={{
+                    color: colors.darkText,
+                    fontSize: "2.5rem",
+                    marginBottom: "1rem",
+                  }}
+                >
                   Join <span style={{ color: colors.primary }}>Pahana Edu</span>
                 </Title>
-                <Text style={{ 
-                  color: colors.lightText,
-                  fontSize: "1.1rem",
-                  display: "block",
-                  marginBottom: "2rem"
-                }}>
-                  Create an account to access our educational resources and services
+                <Text
+                  style={{
+                    color: colors.lightText,
+                    fontSize: "1.1rem",
+                    display: "block",
+                    marginBottom: "2rem",
+                  }}
+                >
+                  Create an account to access our educational resources and
+                  services
                 </Text>
-                <img 
+                <img
                   src="/pahana-edu-logo.png"
                   alt="Pahana Edu logo"
                   style={{
@@ -136,7 +200,7 @@ const Register = () => {
                     maxWidth: "500px",
                     height: "auto",
                     borderRadius: "12px",
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.1)"
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
                   }}
                 />
               </div>
@@ -150,14 +214,17 @@ const Register = () => {
                   borderTop: `4px solid ${colors.primary}`,
                   maxWidth: "500px",
                   margin: "0 auto",
-                  padding: "2rem"
+                  padding: "2rem",
                 }}
               >
-                <Title level={3} style={{ 
-                  color: colors.darkText,
-                  textAlign: "center",
-                  marginBottom: "2rem"
-                }}>
+                <Title
+                  level={3}
+                  style={{
+                    color: colors.darkText,
+                    textAlign: "center",
+                    marginBottom: "2rem",
+                  }}
+                >
                   Create Your Account
                 </Title>
 
@@ -172,11 +239,11 @@ const Register = () => {
                     name="role"
                     label="User Role"
                     rules={[
-                      { required: true, message: 'Please select your role' }
+                      { required: true, message: "Please select your role" },
                     ]}
                   >
-                    <Select 
-                      placeholder="Select your role" 
+                    <Select
+                      placeholder="Select your role"
                       size="large"
                       onChange={handleRoleChange}
                     >
@@ -191,11 +258,13 @@ const Register = () => {
                     name="accountNumber"
                     label="Account Number"
                     rules={[
-                      { required: true, message: 'Account number is required' }
+                      { required: true, message: "Account number is required" },
                     ]}
                   >
                     <Input
-                      prefix={<UserOutlined style={{ color: colors.primary }} />}
+                      prefix={
+                        <UserOutlined style={{ color: colors.primary }} />
+                      }
                       placeholder="Select role to generate account number"
                       size="large"
                       readOnly
@@ -206,11 +275,16 @@ const Register = () => {
                     name="fullName"
                     label="Full Name"
                     rules={[
-                      { required: true, message: 'Please enter your full name' }
+                      {
+                        required: true,
+                        message: "Please enter your full name",
+                      },
                     ]}
                   >
                     <Input
-                      prefix={<UserOutlined style={{ color: colors.primary }} />}
+                      prefix={
+                        <UserOutlined style={{ color: colors.primary }} />
+                      }
                       placeholder="Full name"
                       size="large"
                     />
@@ -220,12 +294,14 @@ const Register = () => {
                     name="email"
                     label="Email"
                     rules={[
-                      { required: true, message: 'Please enter your email' },
-                      { type: 'email', message: 'Please enter a valid email' }
+                      { required: true, message: "Please enter your email" },
+                      { type: "email", message: "Please enter a valid email" },
                     ]}
                   >
                     <Input
-                      prefix={<MailOutlined style={{ color: colors.primary }} />}
+                      prefix={
+                        <MailOutlined style={{ color: colors.primary }} />
+                      }
                       placeholder="Email"
                       size="large"
                     />
@@ -235,13 +311,18 @@ const Register = () => {
                     name="password"
                     label="Password"
                     rules={[
-                      { required: true, message: 'Please enter your password' },
-                      { min: 8, message: 'Password must be at least 8 characters' }
+                      { required: true, message: "Please enter your password" },
+                      {
+                        min: 8,
+                        message: "Password must be at least 8 characters",
+                      },
                     ]}
                     hasFeedback
                   >
                     <Input.Password
-                      prefix={<LockOutlined style={{ color: colors.primary }} />}
+                      prefix={
+                        <LockOutlined style={{ color: colors.primary }} />
+                      }
                       placeholder="Password"
                       size="large"
                     />
@@ -250,22 +331,29 @@ const Register = () => {
                   <Form.Item
                     name="confirm"
                     label="Confirm Password"
-                    dependencies={['password']}
+                    dependencies={["password"]}
                     hasFeedback
                     rules={[
-                      { required: true, message: 'Please confirm your password' },
+                      {
+                        required: true,
+                        message: "Please confirm your password",
+                      },
                       ({ getFieldValue }) => ({
                         validator(_, value) {
-                          if (!value || getFieldValue('password') === value) {
+                          if (!value || getFieldValue("password") === value) {
                             return Promise.resolve();
                           }
-                          return Promise.reject(new Error('The two passwords do not match'));
+                          return Promise.reject(
+                            new Error("The two passwords do not match")
+                          );
                         },
                       }),
                     ]}
                   >
                     <Input.Password
-                      prefix={<LockOutlined style={{ color: colors.primary }} />}
+                      prefix={
+                        <LockOutlined style={{ color: colors.primary }} />
+                      }
                       placeholder="Confirm password"
                       size="large"
                     />
@@ -275,13 +363,23 @@ const Register = () => {
                     name="contact"
                     label="Contact Number"
                     rules={[
-                      { required: true, message: 'Please enter your contact number' }
+                      {
+                        required: true,
+                        message: "Please enter your contact number",
+                      },
+                      {
+                        pattern: /^[0-9]{10}$/,
+                        message: "Contact number must be exactly 10 digits",
+                      },
                     ]}
                   >
                     <Input
-                      prefix={<PhoneOutlined style={{ color: colors.primary }} />}
-                      placeholder="Contact number"
+                      prefix={
+                        <PhoneOutlined style={{ color: colors.primary }} />
+                      }
+                      placeholder="Contact number (10 digits)"
                       size="large"
+                      maxLength={10}
                     />
                   </Form.Item>
 
@@ -289,13 +387,28 @@ const Register = () => {
                     name="nic"
                     label="NIC Number"
                     rules={[
-                      { required: true, message: 'Please enter your NIC number' }
+                      {
+                        required: true,
+                        message: "Please enter your NIC number",
+                      },
+                      {
+                        pattern: /^[0-9]{9}[vVxX]$|^[0-9]{12}$/,
+                        message:
+                          "Please enter a valid NIC number (9 digits + V/X or 12 digits)",
+                      },
                     ]}
                   >
                     <Input
-                      prefix={<IdcardOutlined style={{ color: colors.primary }} />}
-                      placeholder="NIC number"
+                      prefix={
+                        <IdcardOutlined style={{ color: colors.primary }} />
+                      }
+                      placeholder="NIC number (e.g., 123456789V or 123456789012)"
                       size="large"
+                      maxLength={12}
+                      onChange={(e) => {
+                        const value = e.target.value.toUpperCase();
+                        form.setFieldsValue({ nic: value });
+                      }}
                     />
                   </Form.Item>
 
@@ -303,11 +416,13 @@ const Register = () => {
                     name="address"
                     label="Address"
                     rules={[
-                      { required: true, message: 'Please enter your address' }
+                      { required: true, message: "Please enter your address" },
                     ]}
                   >
                     <Input.TextArea
-                      prefix={<HomeOutlined style={{ color: colors.primary }} />}
+                      prefix={
+                        <HomeOutlined style={{ color: colors.primary }} />
+                      }
                       placeholder="Address"
                       rows={3}
                     />
@@ -327,24 +442,26 @@ const Register = () => {
                         fontWeight: 500,
                         height: "48px",
                         fontSize: "1.1rem",
-                        marginTop: "1rem"
+                        marginTop: "1rem",
                       }}
                     >
                       Register
                     </Button>
                   </Form.Item>
 
-                  <div style={{ 
-                    textAlign: "center", 
-                    marginTop: "1rem",
-                    color: colors.lightText
-                  }}>
-                    Already have an account?{' '}
-                    <Link 
-                      href="/auth/login" 
-                      style={{ 
+                  <div
+                    style={{
+                      textAlign: "center",
+                      marginTop: "1rem",
+                      color: colors.lightText,
+                    }}
+                  >
+                    Already have an account?{" "}
+                    <Link
+                      href="/auth/login"
+                      style={{
                         color: colors.primary,
-                        fontWeight: 500
+                        fontWeight: 500,
                       }}
                     >
                       Login here

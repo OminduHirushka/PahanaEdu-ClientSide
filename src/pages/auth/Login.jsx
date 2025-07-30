@@ -18,6 +18,10 @@ import {
 } from "@ant-design/icons";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { loginUser } from "../../state/auth/authAction";
+import toast from "react-hot-toast";
 
 const { Content } = Layout;
 const { Title, Text, Link } = Typography;
@@ -34,8 +38,29 @@ const colors = {
 const Login = () => {
   const [form] = Form.useForm();
 
-  const handleLogin = (values) => {
-    console.log("Received values:", values);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const handleLogin = async (values) => {
+    try {
+      const result = await dispatch(
+        loginUser({
+          email: values.email,
+          password: values.password,
+        })
+      );
+
+      toast.success("Welcome Back!\nLogin successful!");
+
+      if (result.role === "CUSTOMER") {
+        navigate("/");
+      } else {
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("Login error in component:", error);
+      toast.error("Login failed. Please check your credentials.");
+    }
   };
 
   return (
