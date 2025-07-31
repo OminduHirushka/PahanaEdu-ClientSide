@@ -18,6 +18,23 @@ import {
   UnorderedListOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllBooks } from "../../state/book/bookAction";
+import { getAllCategories } from "../../state/category/categoryAction";
+import { getAllPublishers } from "../../state/publisher/publisherAction";
+import {
+  setSearchQuery,
+  setFilters,
+  clearFilters,
+} from "../../state/book/bookSlice";
+import {
+  getCategoryName,
+  getPublisherName,
+  formatBookPrice,
+  generateCategoryOptions,
+  generatePublisherOptions,
+  filterBooks,
+} from "../../utils/bookHelpers";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
@@ -26,126 +43,72 @@ const { Title, Text } = Typography;
 const { Meta } = Card;
 const { Option } = Select;
 
-const mockBooks = [
-  {
-    id: 1,
-    isbn: "978-0062315007",
-    name: "The Alchemist",
-    category: { id: 1, name: "Fiction" },
-    publisher: { id: 1, name: "HarperOne" },
-    price: 2490.0,
-    cover:
-      "https://m.media-amazon.com/images/I/71aFt4+OTOL._AC_UF1000,1000_QL80_.jpg",
-  },
-  {
-    id: 2,
-    isbn: "978-0062457714",
-    name: "The Subtle Art of Not Giving a F*ck",
-    category: { id: 2, name: "Self-Help" },
-    publisher: { id: 2, name: "Harper" },
-    price: 1990.0,
-    cover:
-      "https://m.media-amazon.com/images/I/71Nd7WQ2BEL._AC_UF1000,1000_QL80_.jpg",
-  },
-  {
-    id: 3,
-    isbn: "978-1501173219",
-    name: "The Midnight Library",
-    category: { id: 1, name: "Fiction" },
-    publisher: { id: 3, name: "Viking" },
-    price: 2790.0,
-    cover:
-      "https://m.media-amazon.com/images/I/81Jc4swhURL._AC_UF1000,1000_QL80_.jpg",
-  },
-  {
-    id: 4,
-    isbn: "978-0062315008",
-    name: "The Psychology of Money",
-    category: { id: 3, name: "Finance" },
-    publisher: { id: 4, name: "Harriman House" },
-    price: 2990.0,
-    cover:
-      "https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_UF1000,1000_QL80_.jpg",
-  },
-];
-
 const BooksPage = () => {
   const [viewMode, setViewMode] = useState("grid");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedPublisher, setSelectedPublisher] = useState("all");
-  const [loading, setLoading] = useState(false);
-  const [books, setBooks] = useState([]);
-  const [filteredBooks, setFilteredBooks] = useState([]);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const {
+    books = [],
+    isLoading = false,
+    error = null,
+    searchQuery = "",
+    filters = {},
+  } = useSelector((state) => state.book || {});
+
+  const { categories = [] } = useSelector((state) => state.category || {});
+  const { publishers = [] } = useSelector((state) => state.publisher || {});
+
+  const [filteredBooks, setFilteredBooks] = useState([]);
 
   useEffect(() => {
-    const fetchBooks = async () => {
-      setLoading(true);
+    const fetchData = async () => {
       try {
-        setBooks(mockBooks);
-        setFilteredBooks(mockBooks);
+        await dispatch(getAllBooks());
+        await dispatch(getAllCategories());
+        await dispatch(getAllPublishers());
       } catch (error) {
-        console.error("Failed to fetch books:", error);
-      } finally {
-        setLoading(false);
+        console.error("Failed to fetch data:", error);
       }
     };
 
-    fetchBooks();
-  }, []);
-
-  const categories = [
-    "all",
-    ...new Set(books.map((book) => book.category?.name)),
-  ];
-  const publishers = [
-    "all",
-    ...new Set(books.map((book) => book.publisher?.name)),
-  ];
+    fetchData();
+  }, [dispatch]);
 
   useEffect(() => {
-    setLoading(true);
+    console.log("Books data:", books);
+    console.log("Sample book structure:", books[0]);
+    console.log("Categories data:", categories);
+    console.log("Publishers data:", publishers);
+    if (books.length > 0) {
+      console.log("Sample book categoryName:", books[0]?.categoryName);
+      console.log("Sample book publisherName:", books[0]?.publisherName);
+    }
+  }, [books, categories, publishers]);
 
-    const timer = setTimeout(() => {
-      const filtered = books.filter((book) => {
-        const matchesSearch = book.name
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
-        const matchesCategory =
-          selectedCategory === "all" ||
-          book.category?.name === selectedCategory;
-        const matchesPublisher =
-          selectedPublisher === "all" ||
-          book.publisher?.name === selectedPublisher;
-
-        return matchesSearch && matchesCategory && matchesPublisher;
-      });
-
-      setFilteredBooks(filtered);
-      setLoading(false);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm, selectedCategory, selectedPublisher, books]);
+  useEffect(() => {
+    const filtered = filterBooks(books, searchQuery, filters);
+    setFilteredBooks(filtered);
+  }, [searchQuery, filters, books, categories, publishers]);
 
   const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
+    dispatch(setSearchQuery(e.target.value));
   };
 
   const handleCategoryChange = (value) => {
-    setSelectedCategory(value);
+    dispatch(setFilters({ ...filters, category: value }));
   };
 
   const handlePublisherChange = (value) => {
-    setSelectedPublisher(value);
+    dispatch(setFilters({ ...filters, publisher: value }));
   };
 
   const handleClearFilters = () => {
-    setSearchTerm("");
-    setSelectedCategory("all");
-    setSelectedPublisher("all");
+    dispatch(clearFilters());
   };
+
+  const categoryOptions = generateCategoryOptions(books, categories);
+  const publisherOptions = generatePublisherOptions(books, publishers);
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -197,7 +160,7 @@ const BooksPage = () => {
                 size="large"
                 placeholder="Search books by title..."
                 prefix={<SearchOutlined style={{ color: "#666" }} />}
-                value={searchTerm}
+                value={searchQuery}
                 onChange={handleSearchChange}
                 style={{
                   width: "100%",
@@ -217,13 +180,14 @@ const BooksPage = () => {
                   Category:
                 </Text>
                 <Select
-                  value={selectedCategory}
+                  value={filters.category || "all"}
                   onChange={handleCategoryChange}
                   style={{ width: "150px" }}
+                  loading={isLoading}
                 >
-                  {categories.map((category) => (
-                    <Option key={category} value={category}>
-                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                  {categoryOptions.map((option) => (
+                    <Option key={option.value} value={option.value}>
+                      {option.label}
                     </Option>
                   ))}
                 </Select>
@@ -236,13 +200,14 @@ const BooksPage = () => {
                   Publisher:
                 </Text>
                 <Select
-                  value={selectedPublisher}
+                  value={filters.publisher || "all"}
                   onChange={handlePublisherChange}
                   style={{ width: "200px" }}
+                  loading={isLoading}
                 >
-                  {publishers.map((publisher) => (
-                    <Option key={publisher} value={publisher}>
-                      {publisher.charAt(0).toUpperCase() + publisher.slice(1)}
+                  {publisherOptions.map((option) => (
+                    <Option key={option.value} value={option.value}>
+                      {option.label}
                     </Option>
                   ))}
                 </Select>
@@ -270,9 +235,34 @@ const BooksPage = () => {
 
           <Divider style={{ borderColor: "#f0f0f0" }} />
 
-          {loading ? (
+          {isLoading ? (
             <div style={{ textAlign: "center", padding: "3rem" }}>
               <Spin size="large" />
+            </div>
+          ) : error ? (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "3rem",
+                backgroundColor: "#fff2f0",
+                borderRadius: "8px",
+                border: "1px solid #ffccc7",
+              }}
+            >
+              <Title
+                level={3}
+                style={{ color: "#ff4d4f", marginBottom: "1rem" }}
+              >
+                Error Loading Books
+              </Title>
+              <Text style={{ color: "#666", fontSize: "1rem" }}>{error}</Text>
+              <Button
+                type="primary"
+                style={{ marginTop: "1rem" }}
+                onClick={() => dispatch(getAllBooks())}
+              >
+                Retry
+              </Button>
             </div>
           ) : filteredBooks.length === 0 ? (
             <div
@@ -304,19 +294,43 @@ const BooksPage = () => {
                   <Card
                     hoverable
                     cover={
-                      <img
-                        alt={book.name}
-                        src={book.cover}
-                        style={{
-                          height: "300px",
-                          objectFit: "cover",
-                          borderTopLeftRadius: "8px",
-                          borderTopRightRadius: "8px",
-                        }}
-                      />
+                      book.cover ? (
+                        <img
+                          alt={book.name}
+                          src={book.cover}
+                          style={{
+                            height: "300px",
+                            objectFit: "cover",
+                            borderTopLeftRadius: "8px",
+                            borderTopRightRadius: "8px",
+                          }}
+                          onError={(e) => {
+                            e.target.src =
+                              "https://via.placeholder.com/300x400?text=No+Image";
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            height: "300px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: "#f5f5f5",
+                            borderTopLeftRadius: "8px",
+                            borderTopRightRadius: "8px",
+                          }}
+                        >
+                          <Text style={{ color: "#999", fontSize: "14px" }}>
+                            No Image Available
+                          </Text>
+                        </div>
+                      )
                     }
                     style={{ borderRadius: "8px" }}
-                    onClick={() => navigate(`/books/${book.id}`)}
+                    onClick={() =>
+                      navigate(`/books/${encodeURIComponent(book.name)}`)
+                    }
                   >
                     <Meta
                       title={
@@ -330,16 +344,16 @@ const BooksPage = () => {
                       description={
                         <>
                           <Text style={{ color: "#666" }}>
-                            {book.publisher?.name}
+                            {getPublisherName(book)}
                           </Text>
                           <br />
-                          <Tag color="geekblue">{book.category?.name}</Tag>
+                          <Tag color="geekblue">{getCategoryName(book)}</Tag>
                           <br />
                           <Text
                             strong
                             style={{ color: "#1890ff", fontSize: "1.2rem" }}
                           >
-                            LKR {book.price.toFixed(2)}
+                            {formatBookPrice(book.price)}
                           </Text>
                         </>
                       }
@@ -358,36 +372,60 @@ const BooksPage = () => {
                     borderRadius: "8px",
                   }}
                   hoverable
-                  onClick={() => navigate(`/books/${book.id}`)}
+                  onClick={() =>
+                    navigate(`/books/${encodeURIComponent(book.name)}`)
+                  }
                 >
                   <Row gutter={16}>
                     <Col xs={24} sm={8} md={6}>
-                      <img
-                        alt={book.name}
-                        src={book.cover}
-                        style={{
-                          width: "100%",
-                          height: "200px",
-                          objectFit: "cover",
-                          borderRadius: "4px",
-                        }}
-                      />
+                      {book.cover ? (
+                        <img
+                          alt={book.name}
+                          src={book.cover}
+                          style={{
+                            width: "100%",
+                            height: "200px",
+                            objectFit: "cover",
+                            borderRadius: "4px",
+                          }}
+                          onError={(e) => {
+                            e.target.src =
+                              "https://via.placeholder.com/300x400?text=No+Image";
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: "100%",
+                            height: "200px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: "#f5f5f5",
+                            borderRadius: "4px",
+                          }}
+                        >
+                          <Text style={{ color: "#999", fontSize: "14px" }}>
+                            No Image Available
+                          </Text>
+                        </div>
+                      )}
                     </Col>
                     <Col xs={24} sm={16} md={12}>
                       <Title level={4} style={{ color: "#333" }}>
                         {book.name}
                       </Title>
                       <Text strong style={{ color: "#666" }}>
-                        {book.publisher?.name}
+                        {getPublisherName(book)}
                       </Text>
                       <div style={{ margin: "0.5rem 0" }}>
-                        <Tag color="geekblue">{book.category?.name}</Tag>
+                        <Tag color="geekblue">{getCategoryName(book)}</Tag>
                       </div>
                       <Text
                         strong
                         style={{ color: "#1890ff", fontSize: "1.2rem" }}
                       >
-                        LKR {book.price.toFixed(2)}
+                        {formatBookPrice(book.price)}
                       </Text>
                       <Text
                         style={{
@@ -417,7 +455,7 @@ const BooksPage = () => {
           )}
         </div>
       </Content>
-      
+
       <Footer />
     </Layout>
   );
