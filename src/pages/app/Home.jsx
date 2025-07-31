@@ -1,4 +1,4 @@
-import React, { use, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Layout,
   Card,
@@ -9,6 +9,7 @@ import {
   Divider,
   Typography,
   Tag,
+  Spin,
 } from "antd";
 import {
   SearchOutlined,
@@ -16,6 +17,10 @@ import {
   UnorderedListOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllBooks } from "../../state/book/bookAction";
+import { getAllCategories } from "../../state/category/categoryAction";
+import { getCategoryName, formatBookPrice } from "../../utils/bookHelpers";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 
@@ -23,80 +28,78 @@ const { Content } = Layout;
 const { Title, Text } = Typography;
 const { Meta } = Card;
 
-const books = [
-  {
-    id: 1,
-    title: "The Psychology of Money",
-    author: "Morgan Housel",
-    price: 299,
-    cover:
-      "https://m.media-amazon.com/images/I/71QKQ9mwV7L._AC_UF1000,1000_QL80_.jpg",
-    category: "Finance",
-  },
-  {
-    id: 2,
-    title: "Atomic Habits",
-    author: "James Clear",
-    price: 349,
-    cover:
-      "https://m.media-amazon.com/images/I/91bYsX41DVL._AC_UF1000,1000_QL80_.jpg",
-    category: "Self-Help",
-  },
-  {
-    id: 3,
-    title: "The Silent Patient",
-    author: "Alex Michaelides",
-    price: 399,
-    cover:
-      "https://m.media-amazon.com/images/I/71XW3Zz0UOL._AC_UF1000,1000_QL80_.jpg",
-    category: "Thriller",
-  },
-  {
-    id: 4,
-    title: "Sapiens",
-    author: "Yuval Noah Harari",
-    price: 449,
-    cover:
-      "https://m.media-amazon.com/images/I/713jIoMO3UL._AC_UF1000,1000_QL80_.jpg",
-    category: "History",
-  },
-  {
-    id: 5,
-    title: "The Alchemist",
-    author: "Paulo Coelho",
-    price: 249,
-    cover:
-      "https://m.media-amazon.com/images/I/71aFt4+OTOL._AC_UF1000,1000_QL80_.jpg",
-    category: "Fiction",
-  },
-  {
-    id: 6,
-    title: "Educated",
-    author: "Tara Westover",
-    price: 379,
-    cover:
-      "https://m.media-amazon.com/images/I/71yH6w+3XAL._AC_UF1000,1000_QL80_.jpg",
-    category: "Memoir",
-  },
-];
-
 const Home = () => {
   const [viewMode, setViewMode] = useState("grid");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const {
+    books = [],
+    isLoading = false,
+    error = null,
+  } = useSelector((state) => state.book || {});
+
+  const { categories = [] } = useSelector((state) => state.category || {});
+  const { user, isAuthenticated } = useSelector((state) => state.auth || {});
+
+  useEffect(() => {
+    dispatch(getAllBooks());
+    dispatch(getAllCategories());
+  }, [dispatch]);
 
   const filteredBooks = books.filter((book) => {
     const matchesSearch =
-      book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      book.author.toLowerCase().includes(searchTerm.toLowerCase());
+      book.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      getCategoryName(book)?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory =
-      selectedCategory === "all" || book.category === selectedCategory;
+      selectedCategory === "all" || getCategoryName(book) === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const categories = ["all", ...new Set(books.map((book) => book.category))];
+  const categoryNames = [
+    "all",
+    ...new Set(books.map((book) => getCategoryName(book)).filter(Boolean)),
+  ];
+
+  const handleAddToCart = (book, e) => {
+    e.stopPropagation();
+
+    if (!isAuthenticated || !user) {
+      navigate("/auth/login");
+      return;
+    }
+
+    console.log(
+      `Adding ${book.name} to cart for user: ${user.name || user.email}`
+    );
+  };
+
+  if (isLoading && books.length === 0) {
+    return (
+      <Layout style={{ minHeight: "100vh" }}>
+        <Navbar selectedKey="home" />
+        <Content
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "50vh",
+          }}
+        >
+          <div style={{ textAlign: "center" }}>
+            <Spin size="large" />
+            <div style={{ marginTop: "16px" }}>
+              <Text>Loading books...</Text>
+            </div>
+          </div>
+        </Content>
+        <Footer />
+      </Layout>
+    );
+  }
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -212,7 +215,7 @@ const Home = () => {
                   minWidth: "120px",
                 }}
               >
-                {categories.map((category) => (
+                {categoryNames.map((category) => (
                   <option key={category} value={category}>
                     {category.charAt(0).toUpperCase() + category.slice(1)}
                   </option>
@@ -230,18 +233,43 @@ const Home = () => {
                   <Card
                     hoverable
                     cover={
-                      <img
-                        alt={book.title}
-                        src={book.cover}
-                        style={{
-                          height: "300px",
-                          objectFit: "cover",
-                          borderTopLeftRadius: "8px",
-                          borderTopRightRadius: "8px",
-                        }}
-                      />
+                      book.cover ? (
+                        <img
+                          alt={book.name}
+                          src={book.cover}
+                          style={{
+                            height: "300px",
+                            objectFit: "cover",
+                            borderTopLeftRadius: "8px",
+                            borderTopRightRadius: "8px",
+                          }}
+                          onError={(e) => {
+                            e.target.src =
+                              "https://via.placeholder.com/300x400?text=No+Image";
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            height: "300px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: "#f5f5f5",
+                            borderTopLeftRadius: "8px",
+                            borderTopRightRadius: "8px",
+                          }}
+                        >
+                          <Text style={{ color: "#999", fontSize: "14px" }}>
+                            No Image Available
+                          </Text>
+                        </div>
+                      )
                     }
                     style={{ borderRadius: "8px" }}
+                    onClick={() =>
+                      navigate(`/books/${encodeURIComponent(book.name)}`)
+                    }
                   >
                     <Meta
                       title={
@@ -249,20 +277,22 @@ const Home = () => {
                           strong
                           style={{ color: "#333", fontSize: "1.1rem" }}
                         >
-                          {book.title}
+                          {book.name}
                         </Text>
                       }
                       description={
                         <>
-                          <Text style={{ color: "#666" }}>{book.author}</Text>
+                          <Text style={{ color: "#666" }}>
+                            Stock: {book.stock} available
+                          </Text>
                           <br />
-                          <Tag color="geekblue">{book.category}</Tag>
+                          <Tag color="geekblue">{getCategoryName(book)}</Tag>
                           <br />
                           <Text
                             strong
                             style={{ color: "#1890ff", fontSize: "1.2rem" }}
                           >
-                            LKR {book.price}
+                            {formatBookPrice(book.price)}
                           </Text>
                         </>
                       }
@@ -274,6 +304,7 @@ const Home = () => {
                         width: "100%",
                         fontWeight: 500,
                       }}
+                      onClick={(e) => handleAddToCart(book, e)}
                     >
                       Add to Cart
                     </Button>
@@ -291,35 +322,58 @@ const Home = () => {
                     borderRadius: "8px",
                   }}
                   hoverable
+                  onClick={() =>
+                    navigate(`/books/${encodeURIComponent(book.name)}`)
+                  }
                 >
                   <Row gutter={16}>
                     <Col xs={24} sm={8} md={6}>
-                      <img
-                        alt={book.title}
-                        src={book.cover}
-                        style={{
-                          width: "100%",
-                          height: "200px",
-                          objectFit: "cover",
-                          borderRadius: "4px",
-                        }}
-                      />
+                      {book.cover ? (
+                        <img
+                          alt={book.name}
+                          src={book.cover}
+                          style={{
+                            width: "100%",
+                            height: "200px",
+                            objectFit: "cover",
+                            borderRadius: "4px",
+                          }}
+                          onError={(e) => {
+                            e.target.src =
+                              "https://via.placeholder.com/200x200?text=No+Image";
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: "100%",
+                            height: "200px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: "#f5f5f5",
+                            borderRadius: "4px",
+                          }}
+                        >
+                          <Text style={{ color: "#999" }}>No Image</Text>
+                        </div>
+                      )}
                     </Col>
                     <Col xs={24} sm={16} md={12}>
                       <Title level={4} style={{ color: "#333" }}>
-                        {book.title}
+                        {book.name}
                       </Title>
                       <Text strong style={{ color: "#666" }}>
-                        {book.author}
+                        Stock: {book.stock} units available
                       </Text>
                       <br />
-                      <Tag color="geekblue">{book.category}</Tag>
+                      <Tag color="geekblue">{getCategoryName(book)}</Tag>
                       <br />
                       <Text
                         strong
                         style={{ color: "#1890ff", fontSize: "1.2rem" }}
                       >
-                        LKR {book.price}
+                        {formatBookPrice(book.price)}
                       </Text>
                       <p
                         style={{
@@ -328,8 +382,8 @@ const Home = () => {
                           lineHeight: 1.6,
                         }}
                       >
-                        Explore this captivating read that will keep you engaged
-                        from start to finish. Perfect for fans of the genre.
+                        {book.description ||
+                          "Explore this captivating read that will keep you engaged from start to finish."}
                       </p>
                     </Col>
                     <Col
@@ -349,6 +403,7 @@ const Home = () => {
                           height: "40px",
                           fontWeight: 500,
                         }}
+                        onClick={(e) => handleAddToCart(book, e)}
                       >
                         Add to Cart
                       </Button>

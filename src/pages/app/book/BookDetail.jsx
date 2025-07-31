@@ -22,16 +22,16 @@ import {
 } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getBookByName } from "../../state/book/bookAction";
-import { clearBookState } from "../../state/book/bookSlice";
+import { getBookByName } from "../../../state/book/bookAction";
+import { clearBookState } from "../../../state/book/bookSlice";
 import {
   getCategoryName,
   getPublisherName,
   formatBookPrice,
   getAvailabilityStatus,
-} from "../../utils/bookDetailHelpers";
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
+} from "../../../utils/bookDetailHelpers";
+import Navbar from "../../../components/Navbar";
+import Footer from "../../../components/Footer";
 
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;

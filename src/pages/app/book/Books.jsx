@@ -19,14 +19,14 @@ import {
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllBooks } from "../../state/book/bookAction";
-import { getAllCategories } from "../../state/category/categoryAction";
-import { getAllPublishers } from "../../state/publisher/publisherAction";
+import { getAllBooks } from "../../../state/book/bookAction";
+import { getAllCategories } from "../../../state/category/categoryAction";
+import { getAllPublishers } from "../../../state/publisher/publisherAction";
 import {
   setSearchQuery,
   setFilters,
   clearFilters,
-} from "../../state/book/bookSlice";
+} from "../../../state/book/bookSlice";
 import {
   getCategoryName,
   getPublisherName,
@@ -34,16 +34,16 @@ import {
   generateCategoryOptions,
   generatePublisherOptions,
   filterBooks,
-} from "../../utils/bookHelpers";
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
+} from "../../../utils/bookHelpers";
+import Navbar from "../../../components/Navbar";
+import Footer from "../../../components/Footer";
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
 const { Meta } = Card;
 const { Option } = Select;
 
-const BooksPage = () => {
+const Books = () => {
   const [viewMode, setViewMode] = useState("grid");
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -76,10 +76,6 @@ const BooksPage = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    console.log("Books data:", books);
-    console.log("Sample book structure:", books[0]);
-    console.log("Categories data:", categories);
-    console.log("Publishers data:", publishers);
     if (books.length > 0) {
       console.log("Sample book categoryName:", books[0]?.categoryName);
       console.log("Sample book publisherName:", books[0]?.publisherName);
@@ -127,14 +123,24 @@ const BooksPage = () => {
               maxWidth: "1200px",
               margin: "0 auto",
               padding: "0 2rem",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "1rem",
             }}
           >
-            <Title level={2} style={{ color: "#333", marginBottom: "0.5rem" }}>
-              Our Book Collection
-            </Title>
-            <Text style={{ color: "#666", fontSize: "1.1rem" }}>
-              Browse through our extensive collection of books
-            </Text>
+            <div>
+              <Title
+                level={2}
+                style={{ color: "#333", marginBottom: "0.5rem" }}
+              >
+                Our Book Collection
+              </Title>
+              <Text style={{ color: "#666", fontSize: "1.1rem" }}>
+                Browse through our extensive collection of books
+              </Text>
+            </div>
           </div>
         </div>
 
@@ -461,4 +467,4 @@ const BooksPage = () => {
   );
 };
 
-export default BooksPage;
+export default Books;

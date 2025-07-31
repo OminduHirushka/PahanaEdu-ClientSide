@@ -1,7 +1,7 @@
 import React from 'react'
-import Books from '../pages/book/Books'
-import BookDetail from '../pages/book/BookDetail'
 import { Route, Routes } from 'react-router-dom'
+import BookDetail from '../pages/app/book/BookDetail'
+import Books from '../pages/app/book/Books'
 
 const BookRoutes = () => {
   return (
