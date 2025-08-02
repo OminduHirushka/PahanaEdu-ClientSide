@@ -3,6 +3,7 @@ import authReducer from "../auth/authSlice";
 import categoryReducer from "../category/categorySlice";
 import publisherReducer from "../publisher/publisherSlice";
 import bookReducer from "../book/bookSlice";
+import userReducer from "../user/userSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,5 +11,6 @@ export const store = configureStore({
     category: categoryReducer,
     publisher: publisherReducer,
     book: bookReducer,
+    user: userReducer,
   },
 });

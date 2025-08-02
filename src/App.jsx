@@ -5,6 +5,7 @@ import About from "./pages/app/About";
 import Contact from "./pages/app/Contact";
 import BookRoutes from "./routes/BookRoutes";
 import AuthRoutes from "./routes/AuthRoutes";
+import ManagerRoutes from "./routes/ManagerRoutes";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
       <Route path="/contact" element={<Contact />} />
       <Route path="/books/*" element={<BookRoutes />} />
       <Route path="/auth/*" element={<AuthRoutes />} />
+      <Route path="/manager/*" element={<ManagerRoutes />} />
     </Routes>
   );
 }

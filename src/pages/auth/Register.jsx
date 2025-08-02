@@ -92,7 +92,7 @@ const Register = () => {
     let prefix = "";
     switch (role) {
       case "CUSTOMER":
-        prefix = "CU-";
+        prefix = "UC-";
         break;
       case "EMPLOYEE":
         prefix = "UE-";
@@ -104,7 +104,7 @@ const Register = () => {
         prefix = "UM-";
         break;
       default:
-        prefix = "CU-";
+        prefix = "UC-";
     }
     setAccountNumberPrefix(prefix);
 

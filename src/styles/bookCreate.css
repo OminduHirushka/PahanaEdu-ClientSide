@@ -1,0 +1,70 @@
+/* Book Create Form Styles */
+
+.cover-uploader .ant-upload {
+  width: 200px !important;
+  height: 280px !important;
+  border: 2px dashed #d9d9d9;
+  border-radius: 8px;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.cover-uploader .ant-upload:hover {
+  border-color: #1890ff;
+  background: #f0f8ff;
+}
+
+.cover-uploader .ant-upload-select {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Form styling improvements */
+.ant-form-item-label > label {
+  font-weight: 600;
+  color: #333;
+}
+
+.ant-card-head-title {
+  font-weight: 600;
+  color: #333;
+}
+
+/* Upload button styling */
+.ant-btn-primary {
+  background: #1890ff;
+  border-color: #1890ff;
+  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.3);
+}
+
+.ant-btn-primary:hover {
+  background: #40a9ff;
+  border-color: #40a9ff;
+  box-shadow: 0 4px 8px rgba(24, 144, 255, 0.4);
+}
+
+/* Input number formatting */
+.ant-input-number {
+  width: 100%;
+}
+
+/* Card styling */
+.ant-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ant-card-head {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .cover-uploader .ant-upload {
+    width: 160px !important;
+    height: 224px !important;
+  }
+}
