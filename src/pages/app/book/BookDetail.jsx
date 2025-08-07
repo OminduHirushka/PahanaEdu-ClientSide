@@ -24,6 +24,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getBookByName } from "../../../state/book/bookAction";
 import { clearBookState } from "../../../state/book/bookSlice";
+import { addItemToCart } from "../../../state/cart/cartAction";
 import {
   getCategoryName,
   getPublisherName,
@@ -32,6 +33,7 @@ import {
 } from "../../../utils/bookDetailHelpers";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
+import toast from "react-hot-toast";
 
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -49,6 +51,8 @@ const BookDetail = () => {
     error = null,
   } = useSelector((state) => state.book || {});
 
+  const { user } = useSelector((state) => state.auth);
+
   useEffect(() => {
     dispatch(clearBookState());
 
@@ -62,8 +66,28 @@ const BookDetail = () => {
     };
   }, [dispatch, name]);
 
-  const handleAddToCart = () => {
-    console.log(`Adding ${quantity} copies of book ${book.name} to cart`);
+  const handleAddToCart = async () => {
+    if (!user) {
+      toast.error("Please login to add items to cart");
+      navigate("/auth/login");
+      return;
+    }
+
+    try {
+      const cartItemData = {
+        bookId: book.id,
+        quantity: quantity,
+      };
+
+      await dispatch(addItemToCart(user.accountNumber, cartItemData));
+      toast.success(
+        `${quantity} ${quantity === 1 ? "copy" : "copies"} of "${
+          book.name
+        }" added to cart!`
+      );
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    }
   };
 
   if (isLoading) {

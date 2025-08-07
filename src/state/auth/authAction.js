@@ -6,6 +6,10 @@ import {
   registerRequest,
   registerSuccess,
   registerFailure,
+  getUserProfileRequest,
+  getUserProfileSuccess,
+  getUserProfileFailure,
+  logout,
 } from "./authSlice";
 import toast from "react-hot-toast";
 
@@ -121,6 +125,36 @@ export const loginUser = (credentials) => async (dispatch) => {
     }
 
     dispatch(loginFailure("Login Failed"));
+    throw error;
+  }
+};
+
+export const getCurrentUser = () => async (dispatch) => {
+  dispatch(getUserProfileRequest());
+
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No token found");
+    }
+
+    const result = await axios.get(`${baseURL}/auth/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    dispatch(getUserProfileSuccess(result.data));
+    return result.data;
+  } catch (error) {
+    console.error("Get current user error:", error);
+
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      dispatch(logout());
+    }
+
+    dispatch(getUserProfileFailure(error.response?.data || error.message));
     throw error;
   }
 };

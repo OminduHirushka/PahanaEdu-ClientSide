@@ -33,7 +33,7 @@ const authSlice = createSlice({
     loginSuccess: (state, action) => {
       state.isLoading = false;
       state.token = action.payload.token;
-      state.user = action.payload.user;
+      state.user = action.payload;
       state.error = null;
       state.success = "Login Success";
     },
@@ -48,6 +48,20 @@ const authSlice = createSlice({
       localStorage.removeItem("token");
       state.success = "Logout Success";
     },
+
+    getUserProfileRequest: (state) => {
+      state.isLoading = true;
+      state.error = null;
+    },
+    getUserProfileSuccess: (state, action) => {
+      state.isLoading = false;
+      state.user = action.payload;
+      state.error = null;
+    },
+    getUserProfileFailure: (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload;
+    },
   },
 });
 
@@ -59,6 +73,9 @@ export const {
   loginSuccess,
   loginFailure,
   logout,
+  getUserProfileRequest,
+  getUserProfileSuccess,
+  getUserProfileFailure,
 } = authSlice.actions;
 
 export default authSlice.reducer;

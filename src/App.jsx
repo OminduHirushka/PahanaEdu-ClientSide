@@ -6,6 +6,7 @@ import Contact from "./pages/app/Contact";
 import BookRoutes from "./routes/BookRoutes";
 import AuthRoutes from "./routes/AuthRoutes";
 import ManagerRoutes from "./routes/ManagerRoutes";
+import CustomerRoutes from "./routes/CustomerRoutes";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <Route path="/books/*" element={<BookRoutes />} />
       <Route path="/auth/*" element={<AuthRoutes />} />
       <Route path="/manager/*" element={<ManagerRoutes />} />
+      <Route path="/customer/*" element={<CustomerRoutes />} />
     </Routes>
   );
 }

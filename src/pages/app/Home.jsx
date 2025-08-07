@@ -20,9 +20,11 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllBooks } from "../../state/book/bookAction";
 import { getAllCategories } from "../../state/category/categoryAction";
+import { addItemToCart } from "../../state/cart/cartAction";
 import { getCategoryName, formatBookPrice } from "../../utils/bookHelpers";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import toast from "react-hot-toast";
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -42,7 +44,6 @@ const Home = () => {
     error = null,
   } = useSelector((state) => state.book || {});
 
-  const { categories = [] } = useSelector((state) => state.category || {});
   const { user, isAuthenticated } = useSelector((state) => state.auth || {});
 
   useEffect(() => {
@@ -64,17 +65,25 @@ const Home = () => {
     ...new Set(books.map((book) => getCategoryName(book)).filter(Boolean)),
   ];
 
-  const handleAddToCart = (book, e) => {
+  const handleAddToCart = async (book, e) => {
     e.stopPropagation();
 
-    if (!isAuthenticated || !user) {
+    if (!user) {
+      toast.error("Please login to add items to cart");
       navigate("/auth/login");
       return;
     }
 
-    console.log(
-      `Adding ${book.name} to cart for user: ${user.name || user.email}`
-    );
+    try {
+      const cartItemData = {
+        bookId: book.id,
+        quantity: 1,
+      };
+
+      await dispatch(addItemToCart(user.accountNumber, cartItemData));
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    }
   };
 
   if (isLoading && books.length === 0) {

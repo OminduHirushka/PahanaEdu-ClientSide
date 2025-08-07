@@ -11,17 +11,21 @@ import {
   Tag,
   Select,
   Spin,
+  Space,
 } from "antd";
 import {
   SearchOutlined,
   AppstoreOutlined,
   UnorderedListOutlined,
+  ShoppingCartOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllBooks } from "../../../state/book/bookAction";
 import { getAllCategories } from "../../../state/category/categoryAction";
 import { getAllPublishers } from "../../../state/publisher/publisherAction";
+import { addItemToCart } from "../../../state/cart/cartAction";
 import {
   setSearchQuery,
   setFilters,
@@ -37,6 +41,7 @@ import {
 } from "../../../utils/bookHelpers";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
+import toast from "react-hot-toast";
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -58,6 +63,7 @@ const Books = () => {
 
   const { categories = [] } = useSelector((state) => state.category || {});
   const { publishers = [] } = useSelector((state) => state.publisher || {});
+  const { user } = useSelector((state) => state.auth);
 
   const [filteredBooks, setFilteredBooks] = useState([]);
 
@@ -101,6 +107,32 @@ const Books = () => {
 
   const handleClearFilters = () => {
     dispatch(clearFilters());
+  };
+
+  const handleAddToCart = async (book, event) => {
+    event.stopPropagation();
+
+    if (!user) {
+      toast.error("Please login to add items to cart");
+      navigate("/auth/login");
+      return;
+    }
+
+    try {
+      const cartItemData = {
+        bookId: book.id,
+        quantity: 1,
+      };
+
+      await dispatch(addItemToCart(user.accountNumber, cartItemData));
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    }
+  };
+
+  const handleViewDetails = (book, event) => {
+    event.stopPropagation();
+    navigate(`/books/${encodeURIComponent(book.name)}`);
   };
 
   const categoryOptions = generateCategoryOptions(books, categories);
@@ -334,9 +366,25 @@ const Books = () => {
                       )
                     }
                     style={{ borderRadius: "8px" }}
-                    onClick={() =>
-                      navigate(`/books/${encodeURIComponent(book.name)}`)
-                    }
+                    actions={[
+                      <Button
+                        key="view"
+                        type="text"
+                        icon={<EyeOutlined />}
+                        onClick={(e) => handleViewDetails(book, e)}
+                      >
+                        View Details
+                      </Button>,
+                      <Button
+                        key="cart"
+                        type="text"
+                        icon={<ShoppingCartOutlined />}
+                        onClick={(e) => handleAddToCart(book, e)}
+                        disabled={!book.isAvailable}
+                      >
+                        Add to Cart
+                      </Button>,
+                    ]}
                   >
                     <Meta
                       title={
@@ -378,9 +426,6 @@ const Books = () => {
                     borderRadius: "8px",
                   }}
                   hoverable
-                  onClick={() =>
-                    navigate(`/books/${encodeURIComponent(book.name)}`)
-                  }
                 >
                   <Row gutter={16}>
                     <Col xs={24} sm={8} md={6}>
@@ -451,9 +496,33 @@ const Books = () => {
                       style={{
                         display: "flex",
                         alignItems: "center",
+                        justifyContent: "center",
                         marginTop: "1rem",
                       }}
-                    ></Col>
+                    >
+                      <Space
+                        direction="vertical"
+                        size="small"
+                        style={{ width: "100%" }}
+                      >
+                        <Button
+                          type="primary"
+                          icon={<EyeOutlined />}
+                          onClick={(e) => handleViewDetails(book, e)}
+                          block
+                        >
+                          View Details
+                        </Button>
+                        <Button
+                          icon={<ShoppingCartOutlined />}
+                          onClick={(e) => handleAddToCart(book, e)}
+                          disabled={!book.isAvailable}
+                          block
+                        >
+                          Add to Cart
+                        </Button>
+                      </Space>
+                    </Col>
                   </Row>
                 </Card>
               ))}

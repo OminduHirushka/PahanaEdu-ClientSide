@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Menu,
   Space,
@@ -8,14 +8,21 @@ import {
   Avatar,
   Row,
   Col,
+  Dropdown,
 } from "antd";
 import {
   LoginOutlined,
   UserAddOutlined,
   MenuOutlined,
   CloseOutlined,
+  ShoppingCartOutlined,
+  UserOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { getCurrentUser } from "../state/auth/authAction";
+import { logout } from "../state/auth/authSlice";
 import logo from "/pahana-edu-logo.png";
 
 const { Title } = Typography;
@@ -23,6 +30,41 @@ const { Title } = Typography;
 const Navbar = ({ nav, selectedKey = "home" }) => {
   const [visible, setVisible] = useState(false);
   const [current, setCurrent] = useState(selectedKey);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { user, token } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (token && !user) {
+      dispatch(getCurrentUser());
+    }
+  }, [token, user, dispatch]);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/");
+  };
+
+  const profileMenu = {
+    items: [
+      {
+        key: "profile",
+        label: "Profile",
+        icon: <UserOutlined />,
+        onClick: () => navigate("/customer/profile"),
+      },
+      {
+        type: "divider",
+      },
+      {
+        key: "logout",
+        label: "Logout",
+        icon: <LogoutOutlined />,
+        onClick: handleLogout,
+      },
+    ],
+  };
 
   const mainNavItems = [
     {
@@ -43,22 +85,61 @@ const Navbar = ({ nav, selectedKey = "home" }) => {
     },
   ];
 
-  const authNavItems = [
-    {
-      key: "login",
-      icon: <LoginOutlined />,
-      label: <Link to="/auth/login">Login</Link>,
-      className: "auth-nav-item",
-    },
-    {
-      key: "register",
-      icon: <UserAddOutlined />,
-      label: <Link to="/auth/register">Register</Link>,
-      className: "auth-nav-item register-btn",
-    },
-  ];
+  const authNavItems = user
+    ? [
+        {
+          key: "cart",
+          icon: <ShoppingCartOutlined />,
+          label: <Link to="/customer/cart">Cart</Link>,
+          className: "auth-nav-item",
+        },
+      ]
+    : [
+        {
+          key: "login",
+          icon: <LoginOutlined />,
+          label: <Link to="/auth/login">Login</Link>,
+          className: "auth-nav-item",
+        },
+        {
+          key: "register",
+          icon: <UserAddOutlined />,
+          label: <Link to="/auth/register">Register</Link>,
+          className: "auth-nav-item register-btn",
+        },
+      ];
 
-  const allItems = nav || [...mainNavItems, ...authNavItems];
+  const allItems = nav || [
+    ...mainNavItems,
+    ...authNavItems,
+    ...(user
+      ? [
+          {
+            key: "profile-mobile",
+            icon: <UserOutlined />,
+            label: "Profile",
+            children: [
+              {
+                key: "profile",
+                label: "My Profile",
+                onClick: () => {
+                  navigate("/customer/profile");
+                  setVisible(false);
+                },
+              },
+              {
+                key: "logout-mobile",
+                label: "Logout",
+                onClick: () => {
+                  handleLogout();
+                  setVisible(false);
+                },
+              },
+            ],
+          },
+        ]
+      : []),
+  ];
 
   const showDrawer = () => {
     setVisible(true);
@@ -130,18 +211,39 @@ const Navbar = ({ nav, selectedKey = "home" }) => {
         </Col>
 
         <Col flex="none">
-          <Menu
-            theme="dark"
-            mode="horizontal"
-            selectedKeys={[current]}
-            onClick={onClick}
-            items={authNavItems}
-            style={{
-              backgroundColor: "transparent",
-              border: "none",
-              minWidth: 0,
-            }}
-          />
+          <Space>
+            <Menu
+              theme="dark"
+              mode="horizontal"
+              selectedKeys={[current]}
+              onClick={onClick}
+              items={authNavItems}
+              style={{
+                backgroundColor: "transparent",
+                border: "none",
+                minWidth: 0,
+              }}
+            />
+            {user && (
+              <Dropdown menu={profileMenu} placement="bottomRight">
+                <Button
+                  type="text"
+                  style={{
+                    color: "#fff",
+                    height: "32px",
+                    padding: "4px 8px",
+                  }}
+                >
+                  <Space>
+                    <UserOutlined />
+                    <span style={{ fontSize: "14px" }}>
+                      {user.fullName?.split(" ")[0] || "Profile"}
+                    </span>
+                  </Space>
+                </Button>
+              </Dropdown>
+            )}
+          </Space>
         </Col>
       </Row>
 
