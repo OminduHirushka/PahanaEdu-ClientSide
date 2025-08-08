@@ -1,0 +1,66 @@
+export const ORDER_STATUS = {
+  PENDING: "PENDING",
+  PROCESSING: "PROCESSING", 
+  SHIPPED: "SHIPPED",
+  DELIVERED: "DELIVERED",
+  CANCELLED: "CANCELLED",
+  COMPLETED: "COMPLETED",
+};
+
+export const PAYMENT_STATUS = {
+  PENDING: "PENDING",
+  PAID: "PAID", 
+  CANCELLED: "CANCELLED",
+};
+
+export const ORDER_STATUS_LABELS = {
+  [ORDER_STATUS.PENDING]: "Pending",
+  [ORDER_STATUS.PROCESSING]: "Processing",
+  [ORDER_STATUS.SHIPPED]: "Shipped", 
+  [ORDER_STATUS.DELIVERED]: "Delivered",
+  [ORDER_STATUS.CANCELLED]: "Cancelled",
+  [ORDER_STATUS.COMPLETED]: "Completed",
+};
+
+export const PAYMENT_STATUS_LABELS = {
+  [PAYMENT_STATUS.PENDING]: "Pending",
+  [PAYMENT_STATUS.PAID]: "Paid",
+  [PAYMENT_STATUS.CANCELLED]: "Cancelled",
+};
+
+export const ORDER_STATUS_COLORS = {
+  [ORDER_STATUS.PENDING]: "orange",
+  [ORDER_STATUS.PROCESSING]: "blue",
+  [ORDER_STATUS.SHIPPED]: "cyan",
+  [ORDER_STATUS.DELIVERED]: "green", 
+  [ORDER_STATUS.CANCELLED]: "red",
+  [ORDER_STATUS.COMPLETED]: "green",
+};
+
+export const PAYMENT_STATUS_COLORS = {
+  [PAYMENT_STATUS.PENDING]: "orange",
+  [PAYMENT_STATUS.PAID]: "green",
+  [PAYMENT_STATUS.CANCELLED]: "red",
+};
+
+export const CUSTOMER_ALLOWED_ACTIONS = {
+  [ORDER_STATUS.PENDING]: ["cancel", "view", "download"],
+  [ORDER_STATUS.PROCESSING]: ["view", "download"],
+  [ORDER_STATUS.SHIPPED]: ["view", "download"],
+  [ORDER_STATUS.DELIVERED]: ["view", "download"],
+  [ORDER_STATUS.CANCELLED]: ["view", "download"],
+  [ORDER_STATUS.COMPLETED]: ["view", "download"],
+};
+
+export const SHIPPING_FEE = 250.00;
+
+export default {
+  ORDER_STATUS,
+  PAYMENT_STATUS,
+  ORDER_STATUS_LABELS,
+  PAYMENT_STATUS_LABELS,
+  ORDER_STATUS_COLORS,
+  PAYMENT_STATUS_COLORS,
+  CUSTOMER_ALLOWED_ACTIONS,
+  SHIPPING_FEE,
+};

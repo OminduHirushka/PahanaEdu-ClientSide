@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   Layout,
   Card,
@@ -32,7 +32,6 @@ import {
   updateCartItemQuantity,
   removeCartItem,
   clearCart,
-  checkoutCart,
 } from "../../state/cart/cartAction";
 import { clearCartState, clearCartMessages } from "../../state/cart/cartSlice";
 import Navbar from "../../components/Navbar";
@@ -46,7 +45,9 @@ const CustomerCart = () => {
   const dispatch = useDispatch();
 
   const { user } = useSelector((state) => state.auth);
-  const { cart, cartItems, isLoading, error } = useSelector((state) => state.cart);
+  const { cart, cartItems, isLoading, error } = useSelector(
+    (state) => state.cart
+  );
 
   useEffect(() => {
     if (user?.accountNumber) {
@@ -73,7 +74,7 @@ const CustomerCart = () => {
     if (newQuantity <= 0 || !Number.isInteger(newQuantity)) {
       return;
     }
-    
+
     try {
       dispatch(clearCartMessages());
       await dispatch(updateCartItemQuantity(cartItemId, newQuantity));
@@ -104,8 +105,7 @@ const CustomerCart = () => {
   const handleCheckout = async () => {
     try {
       dispatch(clearCartMessages());
-      await dispatch(checkoutCart(user.accountNumber));
-      navigate("/customer/books");
+      navigate("/customer/order");
     } catch (error) {
       console.error("Error during checkout:", error);
     }
@@ -137,7 +137,10 @@ const CustomerCart = () => {
               <Text strong>{book?.name || "Unknown Book"}</Text>
               <br />
               <Text type="secondary" style={{ fontSize: "12px" }}>
-                Publisher: {book?.publisher?.name || book?.publisherName || "Unknown Publisher"}
+                Publisher:{" "}
+                {book?.publisher?.name ||
+                  book?.publisherName ||
+                  "Unknown Publisher"}
               </Text>
               {book?.category && (
                 <>
@@ -206,12 +209,7 @@ const CustomerCart = () => {
           okText="Yes"
           cancelText="No"
         >
-          <Button
-            type="text"
-            danger
-            icon={<DeleteOutlined />}
-            size="small"
-          />
+          <Button type="text" danger icon={<DeleteOutlined />} size="small" />
         </Popconfirm>
       ),
     },
@@ -288,7 +286,11 @@ const CustomerCart = () => {
             <Breadcrumb.Item>Cart</Breadcrumb.Item>
           </Breadcrumb>
 
-          <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
+          <Row
+            justify="space-between"
+            align="middle"
+            style={{ marginBottom: 24 }}
+          >
             <Col>
               <Title level={2}>
                 <ShoppingCartOutlined style={{ marginRight: 8 }} />
@@ -305,10 +307,7 @@ const CustomerCart = () => {
                     okText="Yes"
                     cancelText="No"
                   >
-                    <Button
-                      icon={<ClearOutlined />}
-                      danger
-                    >
+                    <Button icon={<ClearOutlined />} danger>
                       Clear Cart
                     </Button>
                   </Popconfirm>
@@ -322,12 +321,16 @@ const CustomerCart = () => {
               message="Error"
               description={
                 <div>
-                  {error.includes("transaction") || error.includes("CartItem") ? (
+                  {error.includes("transaction") ||
+                  error.includes("CartItem") ? (
                     <>
-                      <p>There was a temporary database issue. This usually resolves automatically.</p>
-                      <Button 
-                        size="small" 
-                        type="primary" 
+                      <p>
+                        There was a temporary database issue. This usually
+                        resolves automatically.
+                      </p>
+                      <Button
+                        size="small"
+                        type="primary"
                         onClick={fetchCartData}
                         style={{ marginTop: 8 }}
                       >
@@ -385,16 +388,17 @@ const CustomerCart = () => {
                   </Space>
                 </Col>
                 <Col>
-                  <Card
-                    size="small"
-                    style={{ minWidth: 200 }}
-                  >
+                  <Card size="small" style={{ minWidth: 200 }}>
                     <Row justify="space-between" style={{ marginBottom: 8 }}>
                       <Text>Subtotal:</Text>
-                      <Text strong>Rs. {cart?.totalPrice?.toFixed(2) || "0.00"}</Text>
+                      <Text strong>
+                        Rs. {cart?.totalPrice?.toFixed(2) || "0.00"}
+                      </Text>
                     </Row>
                     <Row justify="space-between" style={{ marginBottom: 16 }}>
-                      <Text strong style={{ fontSize: 16 }}>Total:</Text>
+                      <Text strong style={{ fontSize: 16 }}>
+                        Total:
+                      </Text>
                       <Text strong style={{ fontSize: 16, color: "#1890ff" }}>
                         Rs. {cart?.totalPrice?.toFixed(2) || "0.00"}
                       </Text>

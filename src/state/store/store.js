@@ -5,6 +5,7 @@ import publisherReducer from "../publisher/publisherSlice";
 import bookReducer from "../book/bookSlice";
 import userReducer from "../user/userSlice";
 import cartReducer from "../cart/cartSlice";
+import orderReducer from "../order/orderSlice";
 
 export const store = configureStore({
   reducer: {
@@ -14,5 +15,6 @@ export const store = configureStore({
     book: bookReducer,
     user: userReducer,
     cart: cartReducer,
+    order: orderReducer,
   },
 });

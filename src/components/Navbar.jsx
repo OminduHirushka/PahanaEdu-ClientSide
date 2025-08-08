@@ -55,6 +55,12 @@ const Navbar = ({ nav, selectedKey = "home" }) => {
         onClick: () => navigate("/customer/profile"),
       },
       {
+        key: "orders",
+        label: "Orders",
+        icon: <ShoppingCartOutlined />,
+        onClick: () => navigate("/customer/orders"),
+      },
+      {
         type: "divider",
       },
       {
