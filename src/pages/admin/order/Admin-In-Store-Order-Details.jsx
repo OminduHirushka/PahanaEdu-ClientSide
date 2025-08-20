@@ -31,9 +31,7 @@ import {
 } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { 
-  getEmployeeOrderById, 
-} from "../../../state/order/employeeOrderAction";
+import { getEmployeeOrderById } from "../../../state/order/employeeOrderAction";
 import { getBookById } from "../../../state/book/bookAction";
 import { generateInvoicePDF } from "../../../utils/pdfUtils";
 import {
@@ -99,12 +97,14 @@ const BookInfoDisplay = ({ record, dispatch }) => {
   );
 };
 
-const EmployeeOrderDetails = () => {
+const AdminInStoreOrderDetails = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { orderId } = useParams();
 
-  const { currentEmployeeOrder, isLoading, error } = useSelector((state) => state.employeeOrder);
+  const { currentEmployeeOrder, isLoading, error } = useSelector(
+    (state) => state.employeeOrder
+  );
   const order = currentEmployeeOrder;
 
   useEffect(() => {
@@ -113,7 +113,10 @@ const EmployeeOrderDetails = () => {
         try {
           const orderData = await dispatch(getEmployeeOrderById(orderId));
           console.log("Fetched order data:", orderData);
-          console.log("Order items:", orderData?.orderItems || orderData?.items);
+          console.log(
+            "Order items:",
+            orderData?.orderItems || orderData?.items
+          );
         } catch (error) {
           console.error("Failed to fetch order details:", error);
           message.error("Failed to load order details");
@@ -122,7 +125,6 @@ const EmployeeOrderDetails = () => {
     };
 
     fetchOrderDetails();
-
   }, [dispatch, orderId]);
 
   const handleDownloadInvoice = async () => {
@@ -167,7 +169,9 @@ const EmployeeOrderDetails = () => {
       dataIndex: "quantity",
       key: "quantity",
       width: 100,
-      render: (quantity, record) => <Text strong>{quantity || record.qty || 1}</Text>,
+      render: (quantity, record) => (
+        <Text strong>{quantity || record.qty || 1}</Text>
+      ),
     },
     {
       title: "Subtotal",
@@ -230,7 +234,7 @@ const EmployeeOrderDetails = () => {
             type="warning"
             showIcon
             action={
-              <Button size="small" onClick={() => navigate("/employee/orders")}>
+              <Button size="small" onClick={() => navigate("/admin/orders")}>
                 Back to Orders
               </Button>
             }
@@ -241,10 +245,10 @@ const EmployeeOrderDetails = () => {
   }
 
   const getCustomerName = (customerInfo) => {
-    if (typeof customerInfo === 'object' && customerInfo?.fullName) {
+    if (typeof customerInfo === "object" && customerInfo?.fullName) {
       return customerInfo.fullName;
     }
-    if (typeof customerInfo === 'string') {
+    if (typeof customerInfo === "string") {
       return customerInfo;
     }
     return order.customerAccountNumber || "Unknown Customer";
@@ -255,28 +259,6 @@ const EmployeeOrderDetails = () => {
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Content style={{ padding: "24px", background: "#f5f5f5" }}>
-        <Card style={{ marginBottom: 24 }}>
-          <Breadcrumb
-            items={[
-              {
-                title: (
-                  <Button
-                    type="link"
-                    icon={<ArrowLeftOutlined />}
-                    onClick={() => navigate("/employee/orders")}
-                    style={{ padding: 0, height: "auto" }}
-                  >
-                    Orders
-                  </Button>
-                ),
-              },
-              {
-                title: "Order Details",
-              },
-            ]}
-          />
-        </Card>
-
         <Row gutter={[16, 16]}>
           <Col xs={24} lg={16}>
             <Card
@@ -314,7 +296,9 @@ const EmployeeOrderDetails = () => {
                 <Descriptions.Item label="Order Date">
                   <Space>
                     <CalendarOutlined />
-                    {dayjs(order.orderDate || order.createdAt).format("MMMM DD, YYYY")}
+                    {dayjs(order.orderDate || order.createdAt).format(
+                      "MMMM DD, YYYY"
+                    )}
                   </Space>
                 </Descriptions.Item>
                 <Descriptions.Item label="Customer">
@@ -324,7 +308,9 @@ const EmployeeOrderDetails = () => {
                       <Text strong>{customerName}</Text>
                       <br />
                       <Text type="secondary" style={{ fontSize: "12px" }}>
-                        {order.customerAccountNumber || order.customer?.accountNumber || "N/A"}
+                        {order.customerAccountNumber ||
+                          order.customer?.accountNumber ||
+                          "N/A"}
                       </Text>
                     </div>
                   </Space>
@@ -336,40 +322,54 @@ const EmployeeOrderDetails = () => {
                 </Descriptions.Item>
                 <Descriptions.Item label="Order Status">
                   <Tag
-                    color={ORDER_STATUS_COLORS[order.orderStatus || order.status] || 'default'}
+                    color={
+                      ORDER_STATUS_COLORS[order.orderStatus || order.status] ||
+                      "default"
+                    }
                     style={{ fontSize: "14px" }}
                   >
-                    {ORDER_STATUS_LABELS[order.orderStatus || order.status] || order.orderStatus || order.status || 'Unknown'}
+                    {ORDER_STATUS_LABELS[order.orderStatus || order.status] ||
+                      order.orderStatus ||
+                      order.status ||
+                      "Unknown"}
                   </Tag>
                 </Descriptions.Item>
                 <Descriptions.Item label="Payment Status">
                   <Tag
-                    color={PAYMENT_STATUS_COLORS[order.paymentStatus] || 'default'}
+                    color={
+                      PAYMENT_STATUS_COLORS[order.paymentStatus] || "default"
+                    }
                     style={{ fontSize: "14px" }}
                   >
                     {order.paymentStatus || "PENDING"}
                   </Tag>
                 </Descriptions.Item>
                 <Descriptions.Item label="Order Type">
-                  <Tag color={(order.orderType || order.type) === "IN_STORE" ? "purple" : "green"}>
+                  <Tag
+                    color={
+                      (order.orderType || order.type) === "IN_STORE"
+                        ? "purple"
+                        : "green"
+                    }
+                  >
                     {order.orderType || order.type || "ONLINE"}
                   </Tag>
                 </Descriptions.Item>
                 <Descriptions.Item label="Delivery Address">
                   <Space>
                     <EnvironmentOutlined />
-                    <Text>{order.address || order.deliveryAddress || "N/A"}</Text>
+                    <Text>
+                      {order.address || order.deliveryAddress || "N/A"}
+                    </Text>
                   </Space>
                 </Descriptions.Item>
               </Descriptions>
             </Card>
 
-            <Card
-              title="Order Items"
-              style={{ marginTop: 16 }}
-            >
-              {(!order.orderItems && !order.items && !order.orderItemList) || 
-               (order.orderItems || order.items || order.orderItemList || []).length === 0 ? (
+            <Card title="Order Items" style={{ marginTop: 16 }}>
+              {(!order.orderItems && !order.items && !order.orderItemList) ||
+              (order.orderItems || order.items || order.orderItemList || [])
+                .length === 0 ? (
                 <Alert
                   message="No Order Items Found"
                   description="This order doesn't have any items or the items data is not available."
@@ -379,8 +379,15 @@ const EmployeeOrderDetails = () => {
               ) : (
                 <Table
                   columns={orderItemColumns}
-                  dataSource={order.orderItems || order.items || order.orderItemList || []}
-                  rowKey={(record) => record.id || record.orderItemId || record.bookId || Math.random()}
+                  dataSource={
+                    order.orderItems || order.items || order.orderItemList || []
+                  }
+                  rowKey={(record) =>
+                    record.id ||
+                    record.orderItemId ||
+                    record.bookId ||
+                    Math.random()
+                  }
                   pagination={false}
                   summary={(pageData) => {
                     console.log("Table summary pageData:", pageData);
@@ -388,7 +395,7 @@ const EmployeeOrderDetails = () => {
                       const quantity = item.quantity || item.qty || 1;
                       return total + quantity;
                     }, 0);
-                    
+
                     return (
                       <Table.Summary fixed>
                         <Table.Summary.Row>
@@ -396,14 +403,17 @@ const EmployeeOrderDetails = () => {
                             <Text strong>Total</Text>
                           </Table.Summary.Cell>
                           <Table.Summary.Cell index={1}>
-                            <Text strong>
-                              {totalItems} items
-                            </Text>
+                            <Text strong>{totalItems} items</Text>
                           </Table.Summary.Cell>
                           <Table.Summary.Cell index={2} />
                           <Table.Summary.Cell index={3}>
-                            <Text strong style={{ color: "#1890ff", fontSize: "16px" }}>
-                              {formatBookPrice(order.totalAmount || order.total || 0)}
+                            <Text
+                              strong
+                              style={{ color: "#1890ff", fontSize: "16px" }}
+                            >
+                              {formatBookPrice(
+                                order.totalAmount || order.total || 0
+                              )}
                             </Text>
                           </Table.Summary.Cell>
                         </Table.Summary.Row>
@@ -422,24 +432,33 @@ const EmployeeOrderDetails = () => {
                   <Text strong>Order Placed</Text>
                   <br />
                   <Text type="secondary">
-                    {dayjs(order.orderDate || order.createdAt).format("MMM DD, YYYY h:mm A")}
+                    {dayjs(order.orderDate || order.createdAt).format(
+                      "MMM DD, YYYY h:mm A"
+                    )}
                   </Text>
                 </div>
-                
+
                 <Divider />
-                
+
                 <div>
                   <Text strong>Current Status</Text>
                   <br />
                   <Tag
-                    color={ORDER_STATUS_COLORS[order.orderStatus || order.status] || 'default'}
+                    color={
+                      ORDER_STATUS_COLORS[order.orderStatus || order.status] ||
+                      "default"
+                    }
                     style={{ fontSize: "14px", marginTop: 4 }}
                   >
-                    {ORDER_STATUS_LABELS[order.orderStatus || order.status] || order.orderStatus || order.status || 'Unknown'}
+                    {ORDER_STATUS_LABELS[order.orderStatus || order.status] ||
+                      order.orderStatus ||
+                      order.status ||
+                      "Unknown"}
                   </Tag>
                 </div>
 
-                {(order.orderType === "IN_STORE" || order.type === "IN_STORE") && (
+                {(order.orderType === "IN_STORE" ||
+                  order.type === "IN_STORE") && (
                   <>
                     <Divider />
                     <Alert
@@ -459,4 +478,4 @@ const EmployeeOrderDetails = () => {
   );
 };
 
-export default EmployeeOrderDetails;
+export default AdminInStoreOrderDetails;

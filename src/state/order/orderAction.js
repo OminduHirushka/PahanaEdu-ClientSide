@@ -137,13 +137,22 @@ export const updateOrderStatus = (orderId, orderStatus) => async (dispatch) => {
       }
     );
 
-    const updatedOrder = response.data.order || response.data;
-    dispatch(updateOrderStatusSuccess(updatedOrder));
+    console.log("Update order status response:", response.data);
     
-    toast.success(response.data.message || "Order status updated successfully!");
+    const responseData = {
+      order: response.data.order || response.data.data || response.data,
+      message: response.data.message || "Order status updated successfully!"
+    };
+    
+    dispatch(updateOrderStatusSuccess(responseData));
+    
+    toast.success(responseData.message);
     return response.data;
   } catch (error) {
-    const errorMessage = error.response?.data?.message || "Failed to update order status";
+    console.error("Update order status error:", error);
+    console.error("Error response:", error.response?.data);
+    
+    const errorMessage = error.response?.data?.message || error.message || "Failed to update order status";
     dispatch(updateOrderStatusFailure(errorMessage));
     toast.error(errorMessage);
     throw error;
@@ -163,13 +172,22 @@ export const updatePaymentStatus = (orderId, paymentStatus) => async (dispatch) 
       }
     );
 
-    const updatedOrder = response.data.order || response.data;
-    dispatch(updateOrderStatusSuccess(updatedOrder));
+    console.log("Update payment status response:", response.data);
     
-    toast.success(response.data.message || "Payment status updated successfully!");
+    const responseData = {
+      order: response.data.order || response.data.data || response.data,
+      message: response.data.message || "Payment status updated successfully!"
+    };
+    
+    dispatch(updateOrderStatusSuccess(responseData));
+    
+    toast.success(responseData.message);
     return response.data;
   } catch (error) {
-    const errorMessage = error.response?.data?.message || "Failed to update payment status";
+    console.error("Update payment status error:", error);
+    console.error("Error response:", error.response?.data);
+    
+    const errorMessage = error.response?.data?.message || error.message || "Failed to update payment status";
     dispatch(updateOrderStatusFailure(errorMessage));
     toast.error(errorMessage);
     throw error;

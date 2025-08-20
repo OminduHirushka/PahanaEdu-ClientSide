@@ -191,6 +191,16 @@ const Admin_Dashboard = () => {
       key: "orders",
       icon: <ShoppingCartOutlined />,
       label: "Orders",
+      children: [
+        {
+          key: "online-orders",
+          label: "Online Orders",
+        },
+        {
+          key: "in-store-orders",
+          label: "In-Store Orders",
+        },
+      ],
     },
     {
       type: "divider",
@@ -230,6 +240,12 @@ const Admin_Dashboard = () => {
         break;
       case "customers":
         navigate("/admin/customers");
+        break;
+      case "online-orders":
+        navigate("/admin/orders");
+        break;
+      case "in-store-orders":
+        navigate("/admin/in-store-orders");
         break;
       default:
         break;

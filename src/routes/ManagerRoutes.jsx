@@ -9,6 +9,10 @@ import ManagerEmployee from "../pages/manager/user/Manager-Employee";
 import ManagerCustomer from "../pages/manager/customer/Manager-Customer";
 import ManagerBookCreate from "../pages/manager/book/Manager-Book-Create";
 import ManagerBookUpdate from "../pages/manager/book/Manager-Book-Update";
+import ManagerOrders from "../pages/manager/order/Manager-Orders";
+import ManagerInStoreOrders from "../pages/manager/order/Manager-In-Store-Orders";
+import ManagerInStoreOrderDetails from "../pages/manager/order/Manager-In-Store-Order-Details";
+import ManagerOrderDetails from "../pages/manager/order/Manager-Order-Details";
 
 const ManagerRoutes = () => {
   return (
@@ -22,6 +26,10 @@ const ManagerRoutes = () => {
       <Route path="/publishers" element={<ManagerPublisher />} />
       <Route path="/employees" element={<ManagerEmployee />} />
       <Route path="/customers" element={<ManagerCustomer />} />
+      <Route path="/orders" element={<ManagerOrders />} />
+      <Route path="/in-store-orders" element={<ManagerInStoreOrders />} />
+      <Route path="/in-store-orders/:orderId" element={<ManagerInStoreOrderDetails />} />
+      <Route path="/orders/:orderId" element={<ManagerOrderDetails />} />
     </Routes>
   );
 };

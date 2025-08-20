@@ -27,17 +27,15 @@ import {
 } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getOrderById } from "../../state/order/orderAction";
-import { getBookById } from "../../state/book/bookAction";
-import { clearOrderMessages } from "../../state/order/orderSlice";
-import { formatBookPrice } from "../../utils/bookHelpers";
-import { generateInvoicePDF } from "../../utils/pdfUtils";
+import { getOrderById } from "../../../state/order/orderAction";
+import { getBookById } from "../../../state/book/bookAction";
+import { clearOrderMessages } from "../../../state/order/orderSlice";
+import { formatBookPrice } from "../../../utils/bookHelpers";
+import { generateInvoicePDF } from "../../../utils/pdfUtils";
 import {
   ORDER_STATUS_COLORS,
   PAYMENT_STATUS_COLORS,
-} from "../../utils/orderConstants";
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
+} from "../../../utils/orderConstants";
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -94,7 +92,7 @@ const BookInfoDisplay = ({ record, dispatch }) => {
   );
 };
 
-const OrderDetails = () => {
+const ManagerOrderDetails = () => {
   const navigate = useNavigate();
   const { orderId } = useParams();
   const dispatch = useDispatch();
@@ -184,7 +182,6 @@ const OrderDetails = () => {
   if (isLoading) {
     return (
       <Layout style={{ minHeight: "100vh" }}>
-        <Navbar />
         <Content style={{ padding: "24px", flex: 1 }}>
           <div style={{ textAlign: "center", marginTop: "100px" }}>
             <Spin size="large" />
@@ -193,7 +190,6 @@ const OrderDetails = () => {
             </Text>
           </div>
         </Content>
-        <Footer />
       </Layout>
     );
   }
@@ -201,7 +197,6 @@ const OrderDetails = () => {
   if (error) {
     return (
       <Layout style={{ minHeight: "100vh" }}>
-        <Navbar />
         <Content style={{ padding: "24px", flex: 1 }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
             <Alert
@@ -213,14 +208,13 @@ const OrderDetails = () => {
             />
             <Button
               type="primary"
-              onClick={() => navigate("/customer/orders")}
+              onClick={() => navigate("/manager/orders")}
               icon={<ArrowLeftOutlined />}
             >
               Back to Orders
             </Button>
           </div>
         </Content>
-        <Footer />
       </Layout>
     );
   }
@@ -228,7 +222,6 @@ const OrderDetails = () => {
   if (!orderData) {
     return (
       <Layout style={{ minHeight: "100vh" }}>
-        <Navbar />
         <Content style={{ padding: "24px", flex: 1 }}>
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
             <Alert
@@ -240,43 +233,21 @@ const OrderDetails = () => {
             />
             <Button
               type="primary"
-              onClick={() => navigate("/customer/orders")}
+              onClick={() => navigate("/manager/orders")}
               icon={<ArrowLeftOutlined />}
             >
               Back to Orders
             </Button>
           </div>
         </Content>
-        <Footer />
       </Layout>
     );
   }
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Navbar />
       <Content style={{ padding: "24px", flex: 1 }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          <Breadcrumb style={{ marginBottom: "24px" }}>
-            <Breadcrumb.Item>
-              <HomeOutlined />
-            </Breadcrumb.Item>
-            <Breadcrumb.Item>
-              <UserOutlined />
-              Profile
-            </Breadcrumb.Item>
-            <Breadcrumb.Item>
-              <Button
-                type="link"
-                onClick={() => navigate("/customer/orders")}
-                style={{ padding: 0 }}
-              >
-                Orders
-              </Button>
-            </Breadcrumb.Item>
-            <Breadcrumb.Item>Order Details</Breadcrumb.Item>
-          </Breadcrumb>
-
           <Row gutter={24} style={{ marginBottom: "24px" }}>
             <Col span={24}>
               <Card>
@@ -289,7 +260,7 @@ const OrderDetails = () => {
                       <Button
                         type="text"
                         icon={<ArrowLeftOutlined />}
-                        onClick={() => navigate("/customer/orders")}
+                        onClick={() => navigate("/manager/orders")}
                       >
                         Back to Orders
                       </Button>
@@ -477,9 +448,8 @@ const OrderDetails = () => {
           </Row>
         </div>
       </Content>
-      <Footer />
     </Layout>
   );
 };
 
-export default OrderDetails;
+export default ManagerOrderDetails;
