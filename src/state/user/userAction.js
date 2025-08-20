@@ -63,6 +63,41 @@ export const getAllUsers = () => async (dispatch) => {
   }
 };
 
+export const getCustomers = () => async (dispatch) => {
+  dispatch(getUsersRequest());
+
+  try {
+    const result = await axios.get(`${baseURL}/user/`, {
+      headers: getAuthHeaders(),
+    });
+
+    const allUsers = result.data.users || result.data || [];
+    const customers = allUsers.filter(user => user.role === "CUSTOMER");
+
+    const customersData = {
+      users: customers,
+      totalUsers: customers.length,
+      message: `${customers.length} customers found`,
+    };
+
+    dispatch(getUsersSuccess(customersData));
+    return customersData;
+  } catch (error) {
+    if (error.response?.status === 403) {
+      const errorMessage = "Access denied: Unable to load customer list. Please contact your manager.";
+      console.warn(errorMessage);
+      dispatch(getUsersFailure(errorMessage));
+      return { users: [], totalUsers: 0, message: errorMessage };
+    }
+
+    const errorMessage =
+      error.response?.data?.message || "Failed to fetch customers";
+    toast.error(errorMessage);
+    dispatch(getUsersFailure(errorMessage));
+    throw error;
+  }
+};
+
 export const getUserByAccountNumber = (accountNumber) => async (dispatch) => {
   dispatch(getUserRequest());
 

@@ -117,26 +117,64 @@ export const generatePublisherOptions = (books = [], publishers = []) => {
  * Filter books based on search query and filters
  * @param {Array} books - Array of book objects
  * @param {string} searchQuery - Search term
- * @param {Object} filters - Filter object with category and publisher
+ * @param {Object} filters - Filter object with category, publisher, priceRange, and availability
  * @returns {Array} Filtered books array
  */
 export const filterBooks = (books = [], searchQuery = "", filters = {}) => {
   return books.filter((book) => {
+    // Search filter
     const matchesSearch =
-      book?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false;
+      !searchQuery ||
+      book?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      book?.authorName?.toLowerCase().includes(searchQuery.toLowerCase());
 
+    // Category filter
     const categoryName = getCategoryName(book);
     const matchesCategory =
       !filters.category ||
       filters.category === "all" ||
-      categoryName === filters.category;
+      !filters.categoryName ||
+      filters.categoryName === "all" ||
+      categoryName === filters.category ||
+      categoryName === filters.categoryName;
 
+    // Publisher filter
     const publisherName = getPublisherName(book);
     const matchesPublisher =
       !filters.publisher ||
       filters.publisher === "all" ||
-      publisherName === filters.publisher;
+      !filters.publisherName ||
+      filters.publisherName === "all" ||
+      publisherName === filters.publisher ||
+      publisherName === filters.publisherName;
 
-    return matchesSearch && matchesCategory && matchesPublisher;
+    // Price range filter
+    const bookPrice = Number(book?.price) || 0;
+    let matchesPriceRange = true;
+    if (filters.priceRange) {
+      const priceRange = filters.priceRange;
+      if (priceRange === "0-1000") {
+        matchesPriceRange = bookPrice >= 0 && bookPrice <= 1000;
+      } else if (priceRange === "1000-2000") {
+        matchesPriceRange = bookPrice > 1000 && bookPrice <= 2000;
+      } else if (priceRange === "2000-5000") {
+        matchesPriceRange = bookPrice > 2000 && bookPrice <= 5000;
+      } else if (priceRange === "5000+") {
+        matchesPriceRange = bookPrice > 5000;
+      }
+    }
+
+    // Availability filter
+    const bookStock = book?.quantity || book?.stock || 0;
+    let matchesAvailability = true;
+    if (filters.availability) {
+      if (filters.availability === "in-stock") {
+        matchesAvailability = bookStock > 0;
+      } else if (filters.availability === "out-of-stock") {
+        matchesAvailability = bookStock <= 0;
+      }
+    }
+
+    return matchesSearch && matchesCategory && matchesPublisher && matchesPriceRange && matchesAvailability;
   });
 };

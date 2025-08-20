@@ -15,6 +15,9 @@ import {
   cancelOrderRequest,
   cancelOrderSuccess,
   cancelOrderFailure,
+  getAllOrdersRequest,
+  getAllOrdersSuccess,
+  getAllOrdersFailure,
 } from "./orderSlice";
 import toast from "react-hot-toast";
 
@@ -55,8 +58,6 @@ export const createOrder = (cartId, orderData) => async (dispatch) => {
     toast.success(response.data.message || "Order created successfully!");
     return response.data;
   } catch (error) {
-    console.error("Order creation error:", error.response?.data);
-    console.error("Full error:", error);
     const errorMessage =
       error.response?.data?.message ||
       error.response?.data?.error ||
@@ -123,30 +124,52 @@ export const getOrdersByCustomer = (accountNumber) => async (dispatch) => {
   }
 };
 
-export const updateOrderStatus = (orderId, status) => async (dispatch) => {
+export const updateOrderStatus = (orderId, orderStatus) => async (dispatch) => {
   try {
     dispatch(updateOrderStatusRequest());
 
-    const response = await axios.patch(
-      `${baseURL}/orders/update-order/${orderId}/status`,
-      null,
+    const response = await axios.put(
+      `${baseURL}/orders/update-order/${orderId}`,
+      {},
       {
         headers: getAuthHeaders(),
-        params: { status },
+        params: { status: orderStatus }
       }
     );
 
-    dispatch(updateOrderStatusSuccess(response.data));
-    toast.success(
-      response.data.message || "Order status updated successfully!"
-    );
+    const updatedOrder = response.data.order || response.data;
+    dispatch(updateOrderStatusSuccess(updatedOrder));
+    
+    toast.success(response.data.message || "Order status updated successfully!");
     return response.data;
   } catch (error) {
-    const errorMessage =
-      error.response?.data?.message ||
-      error.response?.data?.error ||
-      "Failed to update order status";
+    const errorMessage = error.response?.data?.message || "Failed to update order status";
+    dispatch(updateOrderStatusFailure(errorMessage));
+    toast.error(errorMessage);
+    throw error;
+  }
+};
 
+export const updatePaymentStatus = (orderId, paymentStatus) => async (dispatch) => {
+  try {
+    dispatch(updateOrderStatusRequest());
+
+    const response = await axios.put(
+      `${baseURL}/orders/update-payment/${orderId}`,
+      {},
+      {
+        headers: getAuthHeaders(),
+        params: { paymentStatus: paymentStatus }
+      }
+    );
+
+    const updatedOrder = response.data.order || response.data;
+    dispatch(updateOrderStatusSuccess(updatedOrder));
+    
+    toast.success(response.data.message || "Payment status updated successfully!");
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Failed to update payment status";
     dispatch(updateOrderStatusFailure(errorMessage));
     toast.error(errorMessage);
     throw error;
@@ -180,6 +203,29 @@ export const cancelOrder = (orderId) => async (dispatch) => {
       "Failed to cancel order";
 
     dispatch(cancelOrderFailure(errorMessage));
+    toast.error(errorMessage);
+    throw error;
+  }
+};
+
+export const getAllOrders = () => async (dispatch) => {
+  try {
+    dispatch(getAllOrdersRequest());
+
+    const response = await axios.get(`${baseURL}/orders/`, {
+      headers: getAuthHeaders(),
+    });
+
+    const ordersData = response.data.orders || [];
+    dispatch(getAllOrdersSuccess(ordersData));
+    return ordersData;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      "Failed to fetch orders";
+
+    dispatch(getAllOrdersFailure(errorMessage));
     toast.error(errorMessage);
     throw error;
   }

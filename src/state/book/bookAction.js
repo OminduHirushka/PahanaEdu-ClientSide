@@ -41,8 +41,6 @@ export const getAllBooks = () => async (dispatch) => {
       headers: getAuthHeaders(),
     });
 
-    console.log("Books fetched successfully:", result.data);
-
     const booksData = {
       books: result.data.books || [],
       totalBooks: result.data.books?.length || 0,
@@ -52,8 +50,6 @@ export const getAllBooks = () => async (dispatch) => {
     dispatch(getBooksSuccess(booksData));
     return booksData;
   } catch (error) {
-    console.error("Books fetch error:", error);
-
     toast.error("Failed to fetch books!");
     dispatch(getBooksFailure("Failed to fetch books"));
     throw error;
@@ -71,17 +67,10 @@ export const getBookByName = (bookName) => async (dispatch) => {
       }
     );
 
-    console.log("Book fetched successfully:", result.data);
-
     const bookData = result.data.book || result.data;
     dispatch(getBookSuccess(bookData));
     return bookData;
   } catch (error) {
-    console.error("Book fetch error:", error);
-    console.error("Error response:", error.response);
-    console.error("Error status:", error.response?.status);
-    console.error("Error data:", error.response?.data);
-
     if (error.response?.status === 404) {
       toast.error("Book not found!");
       dispatch(getBookFailure("Book not found"));
@@ -97,25 +86,15 @@ export const getBookById = (bookId) => async (dispatch) => {
   dispatch(getBookRequest());
 
   try {
-    // Try different possible endpoints that might work with your backend
     const result = await axios.get(`${baseURL}/book/${bookId}`, {
       headers: getAuthHeaders(),
     });
-
-    console.log("Book fetched successfully:", result.data);
 
     const bookData = result.data.book || result.data;
     dispatch(getBookSuccess(bookData));
     return bookData;
   } catch (error) {
-    console.error("Book fetch error:", error);
-    console.error("Error response:", error.response);
-    console.error("Error status:", error.response?.status);
-    console.error("Error data:", error.response?.data);
-
     if (error.response?.status === 404) {
-      console.log("Book not found, trying alternative approach...");
-      // If the direct ID approach fails, let's try to find the book from the books list
       try {
         const booksResult = await axios.get(`${baseURL}/book/`, {
           headers: getAuthHeaders(),
@@ -125,7 +104,6 @@ export const getBookById = (bookId) => async (dispatch) => {
         const foundBook = books.find(book => book.id == bookId);
         
         if (foundBook) {
-          console.log("Found book in books list:", foundBook);
           dispatch(getBookSuccess(foundBook));
           return foundBook;
         } else {
@@ -133,7 +111,6 @@ export const getBookById = (bookId) => async (dispatch) => {
           dispatch(getBookFailure("Book not found"));
         }
       } catch (fallbackError) {
-        console.error("Fallback fetch also failed:", fallbackError);
         toast.error("Failed to fetch book!");
         dispatch(getBookFailure("Failed to fetch book"));
       }

@@ -76,15 +76,12 @@ export const getUserCart = (accountNumber) => async (dispatch) => {
     dispatch(getCartSuccess(result.data));
     return result.data;
   } catch (error) {
-    console.error("Get cart error:", error);
-
     if (error.response?.status === 401) {
       toast.error("Session expired. Please login again.");
     } else if (error.response?.status === 404) {
       try {
         await dispatch(createCartForUser(accountNumber));
       } catch (createError) {
-        console.error("Failed to create cart:", createError);
         toast.error("Failed to create cart");
       }
     } else if (error.response?.status === 500) {
@@ -93,12 +90,10 @@ export const getUserCart = (accountNumber) => async (dispatch) => {
         errorMessage.includes("transaction") ||
         errorMessage.includes("CartItem")
       ) {
-        console.warn("Database transaction issue, retrying cart fetch...");
         setTimeout(async () => {
           try {
             await dispatch(getUserCart(accountNumber));
           } catch (retryError) {
-            console.error("Retry failed:", retryError);
             toast.error("Unable to load cart. Please refresh the page.");
           }
         }, 1000);
