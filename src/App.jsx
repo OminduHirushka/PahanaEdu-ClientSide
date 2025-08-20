@@ -6,6 +6,7 @@ import Contact from "./pages/app/Contact";
 import BookRoutes from "./routes/BookRoutes";
 import AuthRoutes from "./routes/AuthRoutes";
 import ManagerRoutes from "./routes/ManagerRoutes";
+import AdminRoutes from "./routes/AdminRoutes";
 import CustomerRoutes from "./routes/CustomerRoutes";
 import EmployeeRoutes from "./routes/EmployeeRoutes";
 
@@ -18,6 +19,7 @@ function App() {
       <Route path="/books/*" element={<BookRoutes />} />
       <Route path="/auth/*" element={<AuthRoutes />} />
       <Route path="/manager/*" element={<ManagerRoutes />} />
+      <Route path="/admin/*" element={<AdminRoutes />} />
       <Route path="/employee/*" element={<EmployeeRoutes />} />
       <Route path="/customer/*" element={<CustomerRoutes />} />
     </Routes>
