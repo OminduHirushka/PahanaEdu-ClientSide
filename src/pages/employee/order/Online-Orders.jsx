@@ -44,6 +44,7 @@ import {
   PAYMENT_STATUS_LABELS,
   PAYMENT_STATUS_COLORS,
 } from "../../../utils/orderConstants";
+import { formatBookPrice } from "../../../utils/bookHelpers";
 import dayjs from "dayjs";
 import { generateInvoicePDF } from "../../../utils/pdfUtils";
 
@@ -52,7 +53,7 @@ const { Title, Text } = Typography;
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
-const ManagerOrders = () => {
+const EmployeeOnlineOrders = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -86,12 +87,7 @@ const ManagerOrders = () => {
     setLoading(true);
     try {
       const ordersData = await dispatch(getAllOrders());
-
-      const onlineOrders = ordersData.filter(
-        (order) => !order.orderType || order.orderType === "ONLINE"
-      );
-
-      setOrders(onlineOrders);
+      setOrders(ordersData);
     } catch (error) {
       console.error("Failed to fetch orders:", error);
       setOrders([]);
@@ -125,17 +121,6 @@ const ManagerOrders = () => {
       filtered = filtered.filter(
         (order) => order.paymentStatus === paymentStatusFilter
       );
-    }
-
-    if (dateRange && dateRange.length === 2) {
-      const [startDate, endDate] = dateRange;
-      filtered = filtered.filter((order) => {
-        const orderDate = dayjs(order.orderDate);
-        return (
-          orderDate.isAfter(startDate.startOf("day")) &&
-          orderDate.isBefore(endDate.endOf("day"))
-        );
-      });
     }
 
     setFilteredOrders(filtered);
@@ -202,7 +187,7 @@ const ManagerOrders = () => {
   };
 
   const handleViewOrder = (orderId) => {
-    navigate(`/manager/orders/${orderId}`);
+    navigate(`/employee/orders/${orderId}`);
   };
 
   const handleGenerateInvoice = async (order) => {
@@ -306,7 +291,7 @@ const ManagerOrders = () => {
       width: 120,
       render: (amount) => (
         <Text strong style={{ color: "#1890ff" }}>
-          Rs. {amount?.toLocaleString() || "0"}
+          {formatBookPrice(amount || 0)}
         </Text>
       ),
       sorter: (a, b) => (a.totalAmount || 0) - (b.totalAmount || 0),
@@ -393,7 +378,7 @@ const ManagerOrders = () => {
               <Space>
                 <Button
                   icon={<ArrowLeftOutlined />}
-                  onClick={() => navigate("/manager/")}
+                  onClick={() => navigate("/employee/")}
                 >
                   Back to Dashboard
                 </Button>
@@ -430,8 +415,7 @@ const ManagerOrders = () => {
             <Card>
               <Statistic
                 title="Total Revenue"
-                value={stats.totalRevenue}
-                prefix="Rs."
+                value={formatBookPrice(stats.totalRevenue)}
                 suffix=""
                 valueStyle={{ color: "#3f8600" }}
               />
@@ -661,9 +645,7 @@ const ManagerOrders = () => {
               </div>
               <div>
                 <Text strong>Total Amount: </Text>
-                <Text>
-                  Rs. {selectedOrder.totalAmount?.toLocaleString() || "0"}
-                </Text>
+                <Text>{formatBookPrice(selectedOrder.totalAmount) || "0"}</Text>
               </div>
               <div>
                 <Text strong>Current Payment Status: </Text>
@@ -697,4 +679,4 @@ const ManagerOrders = () => {
   );
 };
 
-export default ManagerOrders;
+export default EmployeeOnlineOrders;

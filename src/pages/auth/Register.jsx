@@ -237,7 +237,7 @@ const Register = () => {
                 >
                   <Form.Item
                     name="role"
-                    label="User Role"
+                    label="You are a,"
                     rules={[
                       { required: true, message: "Please select your role" },
                     ]}
@@ -248,9 +248,6 @@ const Register = () => {
                       onChange={handleRoleChange}
                     >
                       <Option value="CUSTOMER">Customer</Option>
-                      <Option value="EMPLOYEE">Employee</Option>
-                      <Option value="ADMIN">Admin</Option>
-                      <Option value="MANAGER">Manager</Option>
                     </Select>
                   </Form.Item>
 

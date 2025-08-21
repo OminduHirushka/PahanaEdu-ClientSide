@@ -212,12 +212,6 @@ const EmployeeInStoreOrder = () => {
     setIsOrderModalVisible(true);
   };
 
-  const generateOrderNumber = () => {
-    const timestamp = Date.now();
-    const random = Math.floor(Math.random() * 1000);
-    return `ORD-${timestamp}-${random}`;
-  };
-
   const handleConfirmOrder = async (values) => {
     setIsOrderModalVisible(false);
 

@@ -8,7 +8,7 @@ import EmployeeCustomer from "../pages/employee/customer/Employee-Customer";
 import EmployeeInStoreOrder from "../pages/employee/order/Employee-InStore-Order";
 import EmployeeOrders from "../pages/employee/order/Employee-Orders";
 import EmployeeOrderDetails from "../pages/employee/order/Employee-Order-Details";
-import OnlineOrders from "../pages/employee/Online-Orders";
+import EmployeeOnlineOrders from "../pages/employee/order/Online-Orders";
 
 const EmployeeRoutes = () => {
   return (
@@ -21,7 +21,7 @@ const EmployeeRoutes = () => {
       <Route path="/orders" element={<EmployeeOrders />} />
       <Route path="/orders/create" element={<EmployeeInStoreOrder />} />
       <Route path="/orders/:orderId" element={<EmployeeOrderDetails />} />
-      <Route path="/online-orders" element={<OnlineOrders />} />
+      <Route path="/online-orders" element={<EmployeeOnlineOrders />} />
     </Routes>
   );
 };

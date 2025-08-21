@@ -232,10 +232,7 @@ const Login = () => {
                         </div>
                       </Form.Item>
 
-                      <Link
-                        href="/forgot-password"
-                        style={{ color: colors.primary }}
-                      >
+                      <Link href="#" style={{ color: colors.primary }}>
                         Forgot password?
                       </Link>
                     </div>
@@ -323,7 +320,6 @@ const Login = () => {
           </Row>
         </div>
       </Content>
-
       <Footer />
     </Layout>
   );
